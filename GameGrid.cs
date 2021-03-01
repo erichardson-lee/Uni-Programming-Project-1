@@ -172,6 +172,22 @@ namespace Gamegrid
             return _grid[x, y].Image;
         }
 
+        /// <summary>
+        /// If the component changes size, resize the grid so it stays square and goes as big as possible
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void tbl_centerformat_Paint(object sender, PaintEventArgs e)
+        {
+            if (tbl_centerformat.Height > tbl_centerformat.Width)
+            {
+                tbl_gameGrid.Height = tbl_gameGrid.Width = tbl_centerformat.Width;
+            }
+            else
+            {
+                tbl_gameGrid.Height = tbl_gameGrid.Width = tbl_centerformat.Height;
+            }
+        }
     }
 
     public class CellPressedEventArgs : EventArgs

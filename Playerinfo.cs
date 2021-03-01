@@ -29,6 +29,9 @@ namespace O_Neillo
             }
         }
 
+        [Description("Integer value used to represent the player"), Category("O'Neillo")]
+        public CellValues CellValue { get; set; }
+
         public Image _playerIcon;
         [Description("Icon for this player"), Category("O'Neillo")]
         public Image PlayerIcon
