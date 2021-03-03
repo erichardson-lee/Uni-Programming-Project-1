@@ -194,7 +194,7 @@ namespace O_Neillo
             switch (diag.ShowDialog())
             {
                 case (DialogResult.OK):
-                    { 
+                    {
                         StartGame(diag.RowCount, diag.ColumnCount);
                         diag.Dispose();
                         break;
@@ -208,6 +208,11 @@ namespace O_Neillo
                         break;
                     }
             }
+        }
+
+        private void gameGrid1_CellPressed_1(object sender, CellPressedEventArgs e)
+        {
+            AttemptMove(e.x, e.y);
         }
 
         /// <summary>
