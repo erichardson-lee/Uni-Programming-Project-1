@@ -23,6 +23,25 @@ namespace O_Neillo
     {
         static int SerialisationVersion = 1;
 
+        #region Public classes
+
+        /// <summary>
+        /// Class used to pass savefile data between functions
+        /// </summary>
+        public class GameData
+        {
+            public string Player1Name;
+            public string Player2Name;
+            public int Player1Score;
+            public int Player2Score;
+            public int CurrentPlayer;
+            public int GameRows;
+            public int GameColumns;
+            public CellValues[,] GameValsData;
+        }
+
+        #endregion
+
         #region Internal classes
 
         /// <summary>
@@ -67,20 +86,6 @@ namespace O_Neillo
             public Stack<Point>[] FlankPoints = new Stack<Point>[Directions.Length];
         }
 
-        /// <summary>
-        /// Class used to pass savefile data between functions
-        /// </summary>
-        private class GameData
-        {
-            public string Player1Name;
-            public string Player2Name;
-            public int Player1Score;
-            public int Player2Score;
-            public int CurrentPlayer;
-            public int GameRows;
-            public int GameColumns;
-            public CellValues[,] GameValsData;
-        }
 
         #endregion
 
@@ -120,10 +125,16 @@ namespace O_Neillo
         /// <summary>
         /// Initialises class.
         /// </summary>
-        public MainGame()
+        public MainGame(string SaveFile = "")
         {
             InitializeComponent();
+            gameGrid1.InitializeGrid();
+
             synth.SetOutputToDefaultAudioDevice();
+            if (SaveFile != "" && File.Exists(SaveFile))
+            {
+                LoadGameFromFile(SaveFile);
+            }
         }
 
         /// <summary>
@@ -137,7 +148,7 @@ namespace O_Neillo
                 {
                     case (DialogResult.Yes):
                         {
-                            SaveGame();
+                            SaveGameToFile();
                             break;
                         }
                     case (DialogResult.Cancel):
@@ -162,7 +173,7 @@ namespace O_Neillo
                 {
                     case (DialogResult.Yes):
                         {
-                            SaveGame();
+                            SaveGameToFile();
                             break;
                         }
                     case (DialogResult.Cancel):
@@ -202,17 +213,10 @@ namespace O_Neillo
                 return;
             }
 
-            for (int x = 0; x < gameGrid1.Columns; x++)
+            if (AnyLegalMoves())
             {
-                for (int y = 0; y < gameGrid1.Rows; y++)
-                {
-                    if (LegalMove(x, y))
-                    {
-                        //MessageBox.Show("Legal move found, you can't pass.");
-                        Speak("A legal move was found, you can't pass.", false, true);
-                        return;
-                    }
-                }
+                Speak("A legal move was found, you can't pass.", false, true);
+                return;
             }
 
             //MessageBox.Show("No legal moves found, passing turn");
@@ -238,17 +242,40 @@ namespace O_Neillo
             Speak($"Voice Synthesis Turned {(chk_speak.Checked ? "On" : "Off")}");
         }
 
-        private void loadToolStripMenuItem_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Called whenever the load button is pressed
+        /// </summary>
+        private void loadBtn_Click(object sender, EventArgs e)
         {
-            LoadGame();
+            switch (openFileDialog1.ShowDialog())
+            {
+                case (DialogResult.OK):
+                    {
+                        LoadGameFromFile(openFileDialog1.FileName);
+                        break;
+                    }
+                default:
+                    break;
+            }
         }
 
-        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Called whenever the save button is pressed
+        /// </summary>
+        private void saveBtn_Click(object sender, EventArgs e)
         {
-            SaveGame();
+            if (!playing)
+            {
+                MustBePlayingError();
+                return;
+            }
+            SaveGameToFile();
         }
 
-        private void helpToolStripMenuItem_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Called whenever the help button is pressed
+        /// </summary>
+        private void helpBtn_Click(object sender, EventArgs e)
         {
             new About().Show();
         }
@@ -279,6 +306,21 @@ namespace O_Neillo
             else
             {
                 this.Icon = Properties.Resources.Icon_GridBase;
+            }
+
+            if (!AnyLegalMoves() && playing)
+            {
+                Speak($"No Legal moves found, Skipping {currentPlayer.PlayerName}'s turn", false, true);
+
+                if (previousPlayerPassed == true)
+                {
+                    EndGame();
+                }
+                else
+                {
+                    previousPlayerPassed = true;
+                    SwitchPlayer();
+                }
             }
         }
 
@@ -475,10 +517,7 @@ namespace O_Neillo
         /// <returns>True if a piece can be legally placed there</returns>
         private bool LegalMove(int x, int y)
         {
-
-            FlankInfo flanks = GetFlanks(x, y);
-
-            if (OpponentAdjacent(x, y) && flanks.CanFlank && (GetCell(x, y) == CellValues.blank))
+            if ((GetCell(x, y) == CellValues.blank) && OpponentAdjacent(x, y) && AnyFlanks(x, y).CanFlank)
             {
                 return true;
             }
@@ -684,9 +723,34 @@ namespace O_Neillo
             Speak("", true);
         }
 
+        /// <summary>
+        /// Checks the whole board for any legal moves
+        /// </summary>
+        /// <returns>True if any legal moves are found, false if none are found</returns>
+        private bool AnyLegalMoves()
+        {
+            for (int x = 0; x < gameGrid1.Columns; x++)
+            {
+                for (int y = 0; y < gameGrid1.Rows; y++)
+                {
+                    if (LegalMove(x, y))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Sets the values of the different squares to the new values.
+        /// </summary>
         private void SetGameVals(CellValues[,] newVals)
         {
             gameVals = newVals;
+            gameGrid1.Columns = gameVals.GetLength(0);
+            gameGrid1.Rows = gameVals.GetLength(1);
+            gameGrid1.InitializeGrid();
 
             for (int x = 0; x < newVals.GetLength(0); x++)
             {
@@ -697,7 +761,10 @@ namespace O_Neillo
             }
         }
 
-        private void SaveGame()
+        /// <summary>
+        /// Prompts the user to select a file location, then saves the current game to it
+        /// </summary>
+        private void SaveGameToFile()
         {
             saveFileDialog1.FileName = "O'NeilloSave.ej";
             switch (saveFileDialog1.ShowDialog())
@@ -726,65 +793,82 @@ namespace O_Neillo
 
         }
 
-        private void LoadGame()
+        /// <summary>
+        /// Prompts the user to select a file, then loads it
+        /// </summary>
+        private void LoadGameFromFile(string fileName)
         {
-            switch (openFileDialog1.ShowDialog())
+            try
             {
-                case (DialogResult.OK):
-                    {
-                        GameData gd = DeSerializeGame(File.ReadAllLines(openFileDialog1.FileName));
+                if (!File.Exists(fileName)) throw new Exception("File not found");
 
-                        currentPlayer = (playerinfo1.CellValue == (CellValues)gd.CurrentPlayer) ? playerinfo1 : playerinfo2;
-                        playerinfo1.PlayerName = gd.Player1Name;
-                        playerinfo1.Tokens = gd.Player1Score;
-
-                        playerinfo2.PlayerName = gd.Player2Name;
-                        playerinfo2.Tokens = gd.Player2Score;
-
-                        gameGrid1.Columns = gd.GameColumns;
-                        gameGrid1.Rows = gd.GameRows;
-                        gameGrid1.InitializeGrid();
-                        SetGameVals(gd.GameValsData);
-
-                        playing = true;
-                        playerinfo1.PlayerTurn = false;
-                        playerinfo2.PlayerTurn = false;
-                        currentPlayer.PlayerTurn = true;
-                        break;
-                    }
-                default:
-                    break;
+                GameData gd = DeSerializeGame(File.ReadAllLines(fileName));
+                LoadGame(gd);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
+        /// <summary>
+        /// Loads the data from the gd paramter into the current game
+        /// </summary>
+        /// <param name="gd">Game Data to load</param>
+        private void LoadGame(GameData gd)
+        {
+            currentPlayer = (playerinfo1.CellValue == (CellValues)gd.CurrentPlayer) ? playerinfo1 : playerinfo2;
+            playerinfo1.PlayerName = gd.Player1Name;
+            playerinfo1.Tokens = gd.Player1Score;
+
+            playerinfo2.PlayerName = gd.Player2Name;
+            playerinfo2.Tokens = gd.Player2Score;
+
+            gameGrid1.Columns = gd.GameColumns;
+            gameGrid1.Rows = gd.GameRows;
+            gameGrid1.InitializeGrid();
+            SetGameVals(gd.GameValsData);
+
+            playing = true;
+            playerinfo1.PlayerTurn = false;
+            playerinfo2.PlayerTurn = false;
+            currentPlayer.PlayerTurn = true;
+        }
+
+
+        /// <summary>
+        /// Converts the supplied gamedata to a string (Mainly for saving to a file)
+        /// </summary>
+        /// <param name="data">GameData to save</param>
+        /// <returns></returns>
         private string SerializeGame(GameData data)
         {
             string OutputString = @" 
-                # Serialization format: (lines starting with # are comments) 
-                # All new values should be prefaced with two letters, then a colon
-                # ve:xx 
-                #   - Serialization version
-                # p1:xxx
-                #   - Player1 Name
-                # p2:xxx 
-                #   - Player2 Name
-                # s1:xxx
-                #   - Player1 Score
-                # s2:xxx 
-                #   - Player2 Score
-                # pc:xxx
-                #   - Current Player (0|1)
-                # gr:xxx 
-                #   - Game Rows
-                # gc:xxx
-                #   - Game Columns
-                # gd:x,x,x 
-                #   - gamevals Data, in CSV format, all one line in following order:
-                #     ╔═══╦═══╦═══╗
-                #     ║ 2 ║ 5 ║ 8 ║
-                #     ║ 1 ║ 4 ║ 7 ║
-                #     ║ 0 ║ 3 ║ 6 ║
-                #     ╚═══╩═══╩═══╝
+# Serialization format: (lines starting with # are comments) 
+# All new values should be prefaced with two letters, then a colon
+# ve:xx 
+#   - Serialization version
+# p1:xxx
+#   - Player1 Name
+# p2:xxx 
+#   - Player2 Name
+# s1:xxx
+#   - Player1 Score
+# s2:xxx 
+#   - Player2 Score
+# pc:xxx
+#   - Current Player (0|1)
+# gr:xxx 
+#   - Game Rows
+# gc:xxx
+#   - Game Columns
+# gd:x,x,x 
+#   - gamevals Data, in CSV format, all one line in following order:
+#     ╔═══╦═══╦═══╗
+#     ║ 2 ║ 5 ║ 8 ║
+#     ║ 1 ║ 4 ║ 7 ║
+#     ║ 0 ║ 3 ║ 6 ║
+#     ╚═══╩═══╩═══╝
             ";
             OutputString += Environment.NewLine;
             OutputString += $"ve:{SerialisationVersion}";
@@ -827,6 +911,12 @@ namespace O_Neillo
 
         }
 
+        /// <summary>
+        /// Converts an array of lines to gamedata.
+        /// </summary>
+        /// <seealso cref="File.ReadAllLines"/>
+        /// <param name="data">String array of lines to interpret</param>
+        /// <returns>Gamedata ready to be loaded</returns>
         private GameData DeSerializeGame(string[] data)
         {
             GameData gameData = new GameData();

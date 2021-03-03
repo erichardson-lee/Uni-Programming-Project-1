@@ -47,7 +47,6 @@ namespace O_Neillo
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.chk_speak = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.passToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.txt_speech = new System.Windows.Forms.ToolStripTextBox();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
@@ -128,7 +127,6 @@ namespace O_Neillo
             this.gameToolStripMenuItem,
             this.settingsToolStripMenuItem,
             this.helpToolStripMenuItem,
-            this.passToolStripMenuItem,
             this.txt_speech});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -152,38 +150,38 @@ namespace O_Neillo
             // startGameToolStripMenuItem
             // 
             this.startGameToolStripMenuItem.Name = "startGameToolStripMenuItem";
-            this.startGameToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.startGameToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
             this.startGameToolStripMenuItem.Text = "Start Game";
             this.startGameToolStripMenuItem.Click += new System.EventHandler(this.newGame_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(129, 6);
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
             this.saveToolStripMenuItem.Text = "Save";
-            this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
+            this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveBtn_Click);
             // 
             // loadToolStripMenuItem
             // 
             this.loadToolStripMenuItem.Name = "loadToolStripMenuItem";
-            this.loadToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.loadToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
             this.loadToolStripMenuItem.Text = "Load";
-            this.loadToolStripMenuItem.Click += new System.EventHandler(this.loadToolStripMenuItem_Click);
+            this.loadToolStripMenuItem.Click += new System.EventHandler(this.loadBtn_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(129, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -208,26 +206,20 @@ namespace O_Neillo
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
             this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 23);
             this.helpToolStripMenuItem.Text = "Help";
-            this.helpToolStripMenuItem.Click += new System.EventHandler(this.helpToolStripMenuItem_Click);
-            // 
-            // passToolStripMenuItem
-            // 
-            this.passToolStripMenuItem.Name = "passToolStripMenuItem";
-            this.passToolStripMenuItem.Size = new System.Drawing.Size(42, 23);
-            this.passToolStripMenuItem.Text = "Pass";
-            this.passToolStripMenuItem.Click += new System.EventHandler(this.passBtn_click);
+            this.helpToolStripMenuItem.Click += new System.EventHandler(this.helpBtn_Click);
             // 
             // txt_speech
             // 
             this.txt_speech.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.txt_speech.Enabled = false;
-            this.txt_speech.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.txt_speech.Name = "txt_speech";
             this.txt_speech.Size = new System.Drawing.Size(400, 23);
             // 
             // saveFileDialog1
             // 
+            this.saveFileDialog1.DefaultExt = "ej";
             this.saveFileDialog1.FileName = "O\'NeilloSave.ej";
+            this.saveFileDialog1.Filter = "\"O\'neillo Saves\"|*.ej|\"All Files\"|*.*";
             // 
             // openFileDialog1
             // 
@@ -273,7 +265,6 @@ namespace O_Neillo
         private Gamegrid.GameGrid gameGrid1;
         private Playerinfo playerinfo2;
         private Playerinfo playerinfo1;
-        private System.Windows.Forms.ToolStripMenuItem passToolStripMenuItem;
         private System.Windows.Forms.ToolStripTextBox txt_speech;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
