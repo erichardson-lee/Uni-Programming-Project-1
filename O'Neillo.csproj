@@ -98,6 +98,12 @@
     <Compile Include="GameGrid.Designer.cs">
       <DependentUpon>GameGrid.cs</DependentUpon>
     </Compile>
+    <Compile Include="NewGameDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="NewGameDialog.Designer.cs">
+      <DependentUpon>NewGameDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Playerinfo.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -114,6 +120,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GameGrid.resx">
       <DependentUpon>GameGrid.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NewGameDialog.resx">
+      <DependentUpon>NewGameDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Playerinfo.resx">
       <DependentUpon>Playerinfo.cs</DependentUpon>

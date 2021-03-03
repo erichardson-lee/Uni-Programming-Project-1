@@ -140,7 +140,7 @@ namespace O_Neillo
         /// <summary>
         /// Called whenever you click exit
         /// </summary>
-        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        private void exitBtn_click(object sender, EventArgs e)
         {
             if (playing)
             {
@@ -190,8 +190,25 @@ namespace O_Neillo
                 Speak("Both Players need a name to start.", false, true);
                 return;
             }
+            NewGameDialog diag = new NewGameDialog();
+            switch (diag.ShowDialog())
+            {
+                case (DialogResult.OK):
+                    {
 
-            StartGame();
+                        StartGame(diag.RowCount, diag.ColumnCount);
+                        diag.Dispose();
+                        break;
+                    }
+                case (DialogResult.Cancel):
+                    {
+                        break;
+                    }
+                default:
+                    {
+                        break;
+                    }
+            }
         }
 
         /// <summary>
@@ -327,8 +344,10 @@ namespace O_Neillo
         /// <summary>
         /// Function called to setup the board and start a new game.
         /// </summary>
-        private void StartGame()
+        private void StartGame(int rows, int columns)
         {
+            gameGrid1.Rows = rows;
+            gameGrid1.Columns = columns;
 
             gameGrid1.InitializeGrid();
             gameVals = new CellValues[gameGrid1.Columns, gameGrid1.Rows];
@@ -367,6 +386,7 @@ namespace O_Neillo
         /// </summary>
         private void EndGame()
         {
+            playing = false;
             Playerinfo winner = (playerinfo1.Tokens > playerinfo2.Tokens) ? ref playerinfo1 : ref playerinfo2;
             Speak($"Game Ended, {winner.PlayerName} won with {winner.Tokens} tokens!");
 

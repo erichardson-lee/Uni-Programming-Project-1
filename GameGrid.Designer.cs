@@ -36,17 +36,18 @@ namespace Gamegrid
             // 
             // tbl_gameGrid
             // 
-            this.tbl_gameGrid.ColumnCount = 2;
-            this.tbl_gameGrid.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tbl_gameGrid.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tbl_gameGrid.ColumnCount = 3;
+            this.tbl_gameGrid.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tbl_gameGrid.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tbl_gameGrid.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
             this.tbl_gameGrid.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tbl_gameGrid.Location = new System.Drawing.Point(296, 67);
+            this.tbl_gameGrid.Location = new System.Drawing.Point(196, 67);
             this.tbl_gameGrid.Margin = new System.Windows.Forms.Padding(0);
             this.tbl_gameGrid.Name = "tbl_gameGrid";
             this.tbl_gameGrid.RowCount = 2;
             this.tbl_gameGrid.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tbl_gameGrid.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tbl_gameGrid.Size = new System.Drawing.Size(400, 400);
+            this.tbl_gameGrid.Size = new System.Drawing.Size(600, 400);
             this.tbl_gameGrid.TabIndex = 0;
             // 
             // tbl_centerformat
