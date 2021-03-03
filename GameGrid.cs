@@ -75,7 +75,9 @@ namespace Gamegrid
             set
             {
                 _defaultImage = value;
-                InitializeGrid();
+
+                if (DesignMode)
+                    InitializeGrid();
             }
         }
 
@@ -100,16 +102,15 @@ namespace Gamegrid
         /// </summary>
         public void InitializeGrid()
         {
-            if (Columns == 0 || Rows == 0)
+            if (Columns <= 0 || Rows <= 0)
             {
                 //MessageBox.Show($"Col: {_columns}, Row: {_rows}");
                 return;
             }
+            // set cursor to wait one
+            Cursor.Current = Cursors.WaitCursor;
 
             _grid = new Cell[Columns, Rows];
-
-            int colWidth = 100 / Columns;
-            int rowHeight = 100 / Rows;
 
             tbl_gameGrid.Controls.Clear();
             tbl_gameGrid.ColumnStyles.Clear();
@@ -118,13 +119,19 @@ namespace Gamegrid
             tbl_gameGrid.ColumnCount = Columns;
             tbl_gameGrid.RowCount = Rows;
 
+            for (int row = 0; row < Rows; row++)
+            {
+                tbl_gameGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+            }
+            for (int column = 0; column < Columns; column++)
+            {
+                tbl_gameGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            }
+
             for (int y = 0; y < Rows; y++)
             {
-                tbl_gameGrid.RowStyles.Add(new RowStyle(SizeType.Percent, rowHeight));
                 for (int x = 0; x < Columns; x++)
                 {
-                    tbl_gameGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, colWidth));
-
                     // Flips y axis, so _grid [1,1] is bottom left,
                     // +'ve X is going right, and +'ve Y is going up.
                     ref Cell img = ref _grid[x, Rows - (y + 1)];
@@ -139,6 +146,9 @@ namespace Gamegrid
                     tbl_gameGrid.Controls.Add(img, x, y);
                 }
             }
+            
+            // Set cursor back to normal
+            Cursor.Current = Cursors.Default;
 
             ResizeTable();
         }

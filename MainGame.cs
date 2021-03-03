@@ -194,8 +194,7 @@ namespace O_Neillo
             switch (diag.ShowDialog())
             {
                 case (DialogResult.OK):
-                    {
-
+                    { 
                         StartGame(diag.RowCount, diag.ColumnCount);
                         diag.Dispose();
                         break;
