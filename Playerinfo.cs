@@ -53,6 +53,10 @@ namespace O_Neillo
             {
                 return playername.Text;
             }
+            set
+            {
+                playername.Text = value;
+            }
         }
 
         private bool _playerTurn;

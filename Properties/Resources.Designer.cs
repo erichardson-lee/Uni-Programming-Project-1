@@ -73,6 +73,16 @@ namespace O_Neillo.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap GameBoard {
+            get {
+                object obj = ResourceManager.GetObject("GameBoard", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap GridBase {
             get {
                 object obj = ResourceManager.GetObject("GridBase", resourceCulture);
@@ -97,6 +107,36 @@ namespace O_Neillo.Properties {
             get {
                 object obj = ResourceManager.GetObject("GridWhite", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon Icon_GridBase {
+            get {
+                object obj = ResourceManager.GetObject("Icon_GridBase", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon Icon_GridBlack {
+            get {
+                object obj = ResourceManager.GetObject("Icon_GridBlack", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon Icon_GridWhite {
+            get {
+                object obj = ResourceManager.GetObject("Icon_GridWhite", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
             }
         }
     }

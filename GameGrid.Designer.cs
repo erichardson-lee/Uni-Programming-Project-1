@@ -40,13 +40,13 @@ namespace Gamegrid
             this.tbl_gameGrid.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tbl_gameGrid.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tbl_gameGrid.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tbl_gameGrid.Location = new System.Drawing.Point(246, 17);
+            this.tbl_gameGrid.Location = new System.Drawing.Point(296, 67);
             this.tbl_gameGrid.Margin = new System.Windows.Forms.Padding(0);
             this.tbl_gameGrid.Name = "tbl_gameGrid";
             this.tbl_gameGrid.RowCount = 2;
             this.tbl_gameGrid.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tbl_gameGrid.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tbl_gameGrid.Size = new System.Drawing.Size(500, 500);
+            this.tbl_gameGrid.Size = new System.Drawing.Size(400, 400);
             this.tbl_gameGrid.TabIndex = 0;
             // 
             // tbl_centerformat

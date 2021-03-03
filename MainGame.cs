@@ -1,17 +1,17 @@
-﻿using System;
+﻿using Gamegrid;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+using System.IO;
 using System.Speech.Synthesis;
-using Gamegrid;
+using System.Windows.Forms;
+using System.Media;
 
 namespace O_Neillo
 {
+    /// <summary>
+    /// Cell values, used internally instead of hard coded values.
+    /// </summary>
     public enum CellValues
     {
         black = 1,
@@ -21,6 +21,8 @@ namespace O_Neillo
 
     public partial class MainGame : Form
     {
+        static int SerialisationVersion = 1;
+
         #region Internal classes
 
         /// <summary>
@@ -53,7 +55,9 @@ namespace O_Neillo
             new Direction(1,1)
         };
 
-
+        /// <summary>
+        /// Class used to pass around point stacks for tokens to flip
+        /// </summary>
         private class FlankInfo
         {
             /// <summary>
@@ -63,63 +67,133 @@ namespace O_Neillo
             public Stack<Point>[] FlankPoints = new Stack<Point>[Directions.Length];
         }
 
+        /// <summary>
+        /// Class used to pass savefile data between functions
+        /// </summary>
+        private class GameData
+        {
+            public string Player1Name;
+            public string Player2Name;
+            public int Player1Score;
+            public int Player2Score;
+            public int CurrentPlayer;
+            public int GameRows;
+            public int GameColumns;
+            public CellValues[,] GameValsData;
+        }
+
         #endregion
 
         #region Internal variables
         Image GridBlack = Properties.Resources.GridBlack;
         Image GridWhite = Properties.Resources.GridWhite;
 
+        /// <summary>
+        /// Says whether or not the game's currently being played.
+        /// </summary>
         bool playing = false;
+
+        /// <summary>
+        /// Stores the values of each grid for ease of lookup
+        /// </summary>
         CellValues[,] gameVals;
 
+        /// <summary>
+        /// Stores which player's currently playing
+        /// </summary>
         Playerinfo currentPlayer;
+
+        /// <summary>
+        /// Stores if the previous player passed (If both pass, game ends)
+        /// </summary>
         bool previousPlayerPassed;
 
+        /// <summary>
+        /// Speach Synthesize used for TTS
+        /// </summary>
         SpeechSynthesizer synth = new SpeechSynthesizer();
 
         #endregion
 
         #region Internal functions (Events)
 
+        /// <summary>
+        /// Initialises class.
+        /// </summary>
         public MainGame()
         {
             InitializeComponent();
             synth.SetOutputToDefaultAudioDevice();
         }
 
+        /// <summary>
+        /// Called whenever you click exit
+        /// </summary>
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (playing)
+            {
+                switch (MessageBox.Show("Would you like to save the game before exiting?", "Save game?", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question))
+                {
+                    case (DialogResult.Yes):
+                        {
+                            SaveGame();
+                            break;
+                        }
+                    case (DialogResult.Cancel):
+                        {
+                            return;
+                        }
+                    default:
+                        break;
+                }
+            }
             Application.Exit();
         }
 
-        private void startGameToolStripMenuItem_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Called whenever you click start game
+        /// </summary>
+        private void newGame_Click(object sender, EventArgs e)
         {
-            if (playerinfo1.PlayerName == "" || playerinfo2.PlayerName == "")
+            if (playing)
             {
-                Speak("Both Players need a name to start.");
-                return;
-            }
-
-            gameGrid1.InitializeGrid();
-            gameVals = new CellValues[gameGrid1.Columns, gameGrid1.Rows];
-
-            for (int x = 0; x < gameGrid1.Columns; x++)
-            {
-                for (int y = 0; y < gameGrid1.Rows; y++)
+                switch (MessageBox.Show("Would you like to save the present game before starting a new one?", "Save game?", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question))
                 {
-                    gameVals[x, y] = CellValues.blank;
+                    case (DialogResult.Yes):
+                        {
+                            SaveGame();
+                            break;
+                        }
+                    case (DialogResult.Cancel):
+                        {
+                            return;
+                        }
+                    default:
+                        break;
                 }
             }
 
+            if (playerinfo1.PlayerName == "" || playerinfo2.PlayerName == "")
+            {
+                Speak("Both Players need a name to start.", false, true);
+                return;
+            }
 
             StartGame();
         }
 
+        /// <summary>
+        /// Called whenever the grid's pressed
+        /// </summary>
         private void gameGrid1_CellPressed(object sender, CellPressedEventArgs e)
         {
             AttemptMove(e.x, e.y);
         }
 
+        /// <summary>
+        /// Called whenever the pass button's pressed.
+        /// </summary>
         private void passBtn_click(object sender, EventArgs e)
         {
             if (!playing)
@@ -135,7 +209,7 @@ namespace O_Neillo
                     if (LegalMove(x, y))
                     {
                         //MessageBox.Show("Legal move found, you can't pass.");
-                        Speak("A legal move was found, you can't pass.");
+                        Speak("A legal move was found, you can't pass.", false, true);
                         return;
                     }
                 }
@@ -150,42 +224,105 @@ namespace O_Neillo
             else
             {
                 previousPlayerPassed = true;
-
-                // Switch Player
-                currentPlayer.PlayerTurn = false;
-                currentPlayer = (currentPlayer == playerinfo1) ? playerinfo2 : playerinfo1;
-                currentPlayer.PlayerTurn = true;
+                SwitchPlayer();
             }
 
             return;
         }
 
+        /// <summary>
+        /// Called whenever the speak checkbox is clicked.
+        /// </summary>
         private void chk_speak_Click(object sender, EventArgs e)
         {
             Speak($"Voice Synthesis Turned {(chk_speak.Checked ? "On" : "Off")}");
         }
 
+        private void loadToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            LoadGame();
+        }
+
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveGame();
+        }
+
+        private void helpToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            new About().Show();
+        }
 
         #endregion
 
         #region Internal functions (Gameplay)
+
+        /// <summary>
+        /// Call this function to switch which player's currently playing.
+        /// </summary>
+        private void SwitchPlayer()
+        {
+            currentPlayer.PlayerTurn = false;
+
+            currentPlayer = (currentPlayer == playerinfo1) ? playerinfo2 : playerinfo1;
+
+            currentPlayer.PlayerTurn = true;
+
+            if (currentPlayer.CellValue == CellValues.black)
+            {
+                this.Icon = Properties.Resources.Icon_GridBlack;
+            }
+            else if (currentPlayer.CellValue == CellValues.white)
+            {
+                this.Icon = Properties.Resources.Icon_GridWhite;
+            }
+            else
+            {
+                this.Icon = Properties.Resources.Icon_GridBase;
+            }
+        }
+
+        /// <summary>
+        /// Function called to setup the board and start a new game.
+        /// </summary>
         private void StartGame()
         {
-            SetCell(3, 3, CellValues.black);
-            SetCell(4, 4, CellValues.black);
-            SetCell(4, 3, CellValues.white);
-            SetCell(3, 4, CellValues.white);
+
+            gameGrid1.InitializeGrid();
+            gameVals = new CellValues[gameGrid1.Columns, gameGrid1.Rows];
+
+            for (int x = 0; x < gameGrid1.Columns; x++)
+            {
+                for (int y = 0; y < gameGrid1.Rows; y++)
+                {
+                    gameVals[x, y] = CellValues.blank;
+                }
+            }
+
+            int cx = gameGrid1.Columns / 2;
+            int cy = gameGrid1.Rows / 2;
+
+            SetCell(cx - 1, cy - 1, CellValues.black);
+            SetCell(cx, cy, CellValues.black);
+            SetCell(cx, cy - 1, CellValues.white);
+            SetCell(cx - 1, cy, CellValues.white);
 
             playerinfo1.Tokens = 2;
+            playerinfo1.PlayerTurn = true;
             playerinfo2.Tokens = 2;
+            playerinfo2.PlayerTurn = false;
 
-            Speak($"Starting Game, {playerinfo1.PlayerName} as black versus {playerinfo2.PlayerName} as white.");
+            Speak($"Starting Game, {playerinfo1.PlayerName} as black versus {playerinfo2.PlayerName} as white.", true);
 
             currentPlayer = playerinfo1;
-            currentPlayer.PlayerTurn = true;
+            this.Icon = Properties.Resources.Icon_GridBlack;
+
             playing = true;
         }
 
+        /// <summary>
+        /// Function called to declare a winner and end the game
+        /// </summary>
         private void EndGame()
         {
             Playerinfo winner = (playerinfo1.Tokens > playerinfo2.Tokens) ? ref playerinfo1 : ref playerinfo2;
@@ -199,38 +336,22 @@ namespace O_Neillo
             );
         }
 
-        private void SetCell(int x, int y, CellValues val)
-        {
-            gameVals[x, y] = val;
-
-            if (val == CellValues.black)
-            {
-                gameGrid1.SetCell(x, y, GridBlack);
-            }
-            else if (val == CellValues.white)
-            {
-                gameGrid1.SetCell(x, y, GridWhite);
-            }
-        }
-
-        private CellValues GetCell(int x, int y)
-        {
-            return gameVals[x, y];
-        }
-
-        private void MustBePlayingError()
-        {
-            MessageBox.Show("You need to start a game first! (Menu -> Start)");
-            return;
-        }
-
+        /// <summary>
+        /// Attempt to place a piece on the specific co-ordinate
+        /// </summary>
+        /// <param name="x">The X value of the cell to place on</param>
+        /// <param name="y">The Y value of the cell to place on</param>
         private void AttemptMove(int x, int y)
         {
+            // For purposes of this, n is the average width/height of the grid.
+
+            // Test O(1)
             if (!playing)
             {
                 MustBePlayingError();
                 return;
             }
+
             // Move must follow these rules:
             // 0) The square you place in must not have a piece already in it
             // 1) Must be adjacent to an opponents piece
@@ -240,6 +361,9 @@ namespace O_Neillo
             // 5) If moves are availble, you can't pass.
             // 6) If neither player has avalable moves, the game ends.
 
+            // To make sure i'm checking in a decent
+
+            // O(1) lookup on an array
             if (GetCell(x, y) != CellValues.blank)
             {
                 // Breaks rule 0, there's somethign already there
@@ -247,6 +371,7 @@ namespace O_Neillo
                 return;
             }
 
+            // O(9) checks all 9 squares in a 3x3 for opponents (including it's own square)
             if (!OpponentAdjacent(x, y))
             {
                 // Breaks rule 1, return and let them try again
@@ -256,6 +381,9 @@ namespace O_Neillo
             }
 
             int dScore = 0;
+
+            // Runs get flanks, checks approiximately 3n cells 
+            // (for 8x8 grid, 5this would be approximately 24, can check up to 27, but will probably be less) 
             FlankInfo flanks = GetFlanks(x, y);
 
             if (!flanks.CanFlank)
@@ -289,17 +417,62 @@ namespace O_Neillo
             }
 
             SetCell(x, y, currentPlayer.CellValue);
-            Speak($"{currentPlayer.PlayerName} placed a token at grid{x + 1}, {y + 1} and flipped {dScore} {(dScore > 1 ? "tokens" : "token")}.");
+            Speak($"{currentPlayer.PlayerName} placed a token at grid{x + 1}, {y + 1} and flipped {dScore} {(dScore > 1 ? "tokens" : "token")}.", true);
             previousPlayerPassed = false;
             currentPlayer.Tokens += dScore + 1;
-            currentPlayer.PlayerTurn = false;
 
-            // Switch Player, remove dScore, then set active
-            currentPlayer = (currentPlayer == playerinfo1) ? playerinfo2 : playerinfo1;
+            SwitchPlayer();
+
             currentPlayer.Tokens -= dScore;
-            currentPlayer.PlayerTurn = true;
         }
 
+        /// <summary>
+        /// Sets the value for a cell
+        /// </summary>
+        /// <param name="x">The X value of the cell to set</param>
+        /// <param name="y">The Y value of the cell to set</param>
+        /// <param name="val">The Value to set the cell to</param>
+        private void SetCell(int x, int y, CellValues val)
+        {
+            gameVals[x, y] = val;
+
+            if (val == CellValues.black)
+            {
+                gameGrid1.SetCell(x, y, GridBlack);
+            }
+            else if (val == CellValues.white)
+            {
+                gameGrid1.SetCell(x, y, GridWhite);
+            }
+        }
+
+        /// <summary>
+        /// Get the value of a cell
+        /// </summary>
+        /// <param name="x">The X value of the cell to check</param>
+        /// <param name="y">The Y value of the cell to check</param>
+        /// <returns>The cells value</returns>
+        private CellValues GetCell(int x, int y)
+        {
+            return gameVals[x, y];
+        }
+
+        /// <summary>
+        /// Used to display an error that you must be playing the game in order to perform a certain action.
+        /// </summary>
+        private void MustBePlayingError()
+        {
+            Speak("You need to start a game first!(Game->Start Game)", false, true);
+            //MessageBox.Show("You need to start a game first! (Game -> Start Game)");
+            return;
+        }
+
+        /// <summary>
+        /// Checks if placing a token on a spot is a legal move.
+        /// </summary>
+        /// <param name="x">The X value of the spot to check</param>
+        /// <param name="y">The Y value of the spot to check</param>
+        /// <returns>True if a piece can be legally placed there</returns>
         private bool LegalMove(int x, int y)
         {
 
@@ -313,6 +486,12 @@ namespace O_Neillo
             return false;
         }
 
+        /// <summary>
+        /// Checks if there is an opponent peice in any adjacent square
+        /// </summary>
+        /// <param name="centerX">The X value to center the search on</param>
+        /// <param name="centerY">The Y value to center the search on</param>
+        /// <returns>True if there is an opponent adjacent</returns>
         private bool OpponentAdjacent(int centerX, int centerY)
         {
             CellValues enemyCell;
@@ -347,6 +526,12 @@ namespace O_Neillo
             return false;
         }
 
+        /// <summary>
+        /// This function takes a point and checks for flanks in every direction.
+        /// </summary>
+        /// <param name="centerX">The X value to center the search on</param>
+        /// <param name="centerY">The Y value to center the search on</param>
+        /// <returns>Flankinfo class</returns>
         private FlankInfo GetFlanks(int centerX, int centerY)
         {
             FlankInfo flankInfo = new FlankInfo();
@@ -377,9 +562,57 @@ namespace O_Neillo
 
             return flankInfo;
         }
-        /// Recursive function that goes in a specified direction and finds all the objects that can be flanked
-        /// Returns true if a flank is found (finds another piece of the same color)
 
+        /// <summary>
+        /// Similar to GetFlanks, but exists when it finds the first one. Mainly for checking if a play is legal.
+        /// </summary>
+        /// <param name="centerX">The X value to center the search on</param>
+        /// <param name="centerY">The Y value to center the search on</param>
+        /// <returns>Flankinfo class (WILL NOT HAVE ALL POSSIBLE FLANKS)</returns>
+        /// <remarks>This functuion is purely for checking that at least one flank exists on the piece.
+        /// There is no guarantee that it will find all the flanks because it stops at the first one.
+        /// If you want to get all the flanks, use <see cref="GetFlanks(int, int)"/> instead.</remarks>
+        private FlankInfo AnyFlanks(int centerX, int centerY)
+        {
+            FlankInfo flankInfo = new FlankInfo();
+
+            // Loops through each direction
+            for (int i = 0; i < Directions.Length; i++)
+            {
+                ref Direction dir = ref Directions[i];
+                // Stack size is slightly overkill, but it's to avoid any potential stack overflows
+                Stack<Point> Flanks = new Stack<Point>(128);
+
+                // If I find a flank in a specific direction, add its stack to the array,
+                // if not, add a blank stack.
+                if (FindFlank(centerX + dir.dx, centerY + dir.dy, dir, Flanks, true))
+                {
+                    // MessageBox.Show($"FlankDir: {dir.dx},{dir.dy} successfull");
+                    flankInfo.FlankPoints[i] = Flanks;
+
+                    // indicates that at least one flank is available (saves any looping later)
+                    flankInfo.CanFlank = true;
+                    return flankInfo;
+                }
+                else
+                {
+                    flankInfo.FlankPoints[i] = new Stack<Point>(0);
+                }
+
+            }
+
+            return flankInfo;
+        }
+
+        /// <summary>
+        /// Recursive function that goes in a specified direction and finds all the objects that can be flanked
+        /// </summary>
+        /// <param name="x">Current point X</param>
+        /// <param name="y">Current point Y</param>
+        /// <param name="dir">Direction to go (if recursing)</param>
+        /// <param name="Flanks">A stack that all flank info will be pushed to</param>
+        /// <param name="first">Is this the first iteration?</param>
+        /// <returns>Returns true if a flank is found</returns>
         private bool FindFlank(int x, int y, Direction dir, Stack<Point> Flanks, bool first = false)
         {
             // Only runs the checks if x and y are on the grid.
@@ -420,7 +653,11 @@ namespace O_Neillo
             return false;
         }
 
-        private void Speak(string text)
+        /// <summary>
+        /// Displays text on top right as well as synthesises it
+        /// </summary>
+        /// <param name="text">Text to display / speak</param>
+        private void Speak(string text, bool silent = false, bool messagebox = false)
         {
             txt_speech.Text = text;
             if (chk_speak.Checked)
@@ -428,13 +665,275 @@ namespace O_Neillo
                 synth.SpeakAsyncCancelAll();
                 synth.SpeakAsync(text);
             }
+            else if (!silent)
+            {
+                SystemSounds.Beep.Play();
+            }
+
+            if (messagebox)
+            {
+                MessageBox.Show(text);
+            }
         }
 
+        /// <summary>
+        /// Stops all currently running voice lines, and clears the output box
+        /// </summary>
         private void StopSpeak()
         {
-            Speak("");
+            Speak("", true);
+        }
+
+        private void SetGameVals(CellValues[,] newVals)
+        {
+            gameVals = newVals;
+
+            for (int x = 0; x < newVals.GetLength(0); x++)
+            {
+                for (int y = 0; y < newVals.GetLength(1); y++)
+                {
+                    SetCell(x, y, gameVals[x, y]);
+                }
+            }
+        }
+
+        private void SaveGame()
+        {
+            saveFileDialog1.FileName = "O'NeilloSave.ej";
+            switch (saveFileDialog1.ShowDialog())
+            {
+                case (DialogResult.OK):
+                    {
+                        GameData gd = new GameData()
+                        {
+                            CurrentPlayer = (int)currentPlayer.CellValue,
+                            Player1Name = playerinfo1.PlayerName,
+                            Player2Name = playerinfo2.PlayerName,
+                            Player1Score = playerinfo1.Tokens,
+                            Player2Score = playerinfo2.Tokens,
+                            GameColumns = gameGrid1.Columns,
+                            GameRows = gameGrid1.Rows,
+                            GameValsData = gameVals
+                        };
+
+                        File.WriteAllText(saveFileDialog1.FileName, SerializeGame(gd));
+
+                        break;
+                    }
+                default:
+                    break;
+            }
+
+        }
+
+        private void LoadGame()
+        {
+            switch (openFileDialog1.ShowDialog())
+            {
+                case (DialogResult.OK):
+                    {
+                        GameData gd = DeSerializeGame(File.ReadAllLines(openFileDialog1.FileName));
+
+                        currentPlayer = (playerinfo1.CellValue == (CellValues)gd.CurrentPlayer) ? playerinfo1 : playerinfo2;
+                        playerinfo1.PlayerName = gd.Player1Name;
+                        playerinfo1.Tokens = gd.Player1Score;
+
+                        playerinfo2.PlayerName = gd.Player2Name;
+                        playerinfo2.Tokens = gd.Player2Score;
+
+                        gameGrid1.Columns = gd.GameColumns;
+                        gameGrid1.Rows = gd.GameRows;
+                        gameGrid1.InitializeGrid();
+                        SetGameVals(gd.GameValsData);
+
+                        playing = true;
+                        playerinfo1.PlayerTurn = false;
+                        playerinfo2.PlayerTurn = false;
+                        currentPlayer.PlayerTurn = true;
+                        break;
+                    }
+                default:
+                    break;
+            }
+        }
+
+        private string SerializeGame(GameData data)
+        {
+            string OutputString = @" 
+                # Serialization format: (lines starting with # are comments) 
+                # All new values should be prefaced with two letters, then a colon
+                # ve:xx 
+                #   - Serialization version
+                # p1:xxx
+                #   - Player1 Name
+                # p2:xxx 
+                #   - Player2 Name
+                # s1:xxx
+                #   - Player1 Score
+                # s2:xxx 
+                #   - Player2 Score
+                # pc:xxx
+                #   - Current Player (0|1)
+                # gr:xxx 
+                #   - Game Rows
+                # gc:xxx
+                #   - Game Columns
+                # gd:x,x,x 
+                #   - gamevals Data, in CSV format, all one line in following order:
+                #     ╔═══╦═══╦═══╗
+                #     ║ 2 ║ 5 ║ 8 ║
+                #     ║ 1 ║ 4 ║ 7 ║
+                #     ║ 0 ║ 3 ║ 6 ║
+                #     ╚═══╩═══╩═══╝
+            ";
+            OutputString += Environment.NewLine;
+            OutputString += $"ve:{SerialisationVersion}";
+
+            OutputString += Environment.NewLine;
+            OutputString += $"p1:{data.Player1Name}";
+
+            OutputString += Environment.NewLine;
+            OutputString += $"p2:{data.Player2Name}";
+
+            OutputString += Environment.NewLine;
+            OutputString += $"s1:{data.Player1Score}";
+
+            OutputString += Environment.NewLine;
+            OutputString += $"s2:{data.Player2Score}";
+
+            OutputString += Environment.NewLine;
+            OutputString += $"pc:{data.CurrentPlayer}";
+
+            OutputString += Environment.NewLine;
+            OutputString += $"gr:{data.GameRows}";
+
+            OutputString += Environment.NewLine;
+            OutputString += $"gc:{data.GameColumns}";
+
+            int[] flatVars = new int[gameVals.GetLength(0) * gameVals.GetLength(1)];
+
+            for (int x = 0; x < data.GameColumns; x++)
+            {
+                for (int y = 0; y < data.GameRows; y++)
+                {
+                    flatVars[y + (x * data.GameColumns)] = (int)gameVals[x, y];
+                }
+            }
+
+            OutputString += Environment.NewLine;
+            OutputString += $"gd:{string.Join(",", flatVars)}";
+
+            return OutputString;
+
+        }
+
+        private GameData DeSerializeGame(string[] data)
+        {
+            GameData gameData = new GameData();
+
+            foreach (string line in data)
+            {
+                // skip if lines < 2 chars, it's not long enough to have a key
+                if (line.Length < 2) { continue; }
+
+                // skip line if first char is #
+                if (line[0] == '#') { continue; }
+                string key = line.Substring(0, 2).ToLower();
+                string val = line.Substring(3);
+
+                switch (key)
+                {
+                    case ("ve"):
+                        {
+                            int ver = int.Parse(val);
+                            if (ver != SerialisationVersion)
+                            {
+                                throw new Exception("Invalid Savegame Version");
+                            }
+                            break;
+                        }
+                    case ("p1"):
+                        {
+                            gameData.Player1Name = val;
+                            break;
+                        }
+                    case ("p2"):
+                        {
+                            gameData.Player2Name = val;
+                            break;
+                        }
+                    case ("s1"):
+                        {
+                            gameData.Player1Score = int.Parse(val);
+                            break;
+                        }
+                    case ("s2"):
+                        {
+                            gameData.Player2Score = int.Parse(val);
+                            break;
+                        }
+                    case ("pc"):
+                        {
+                            gameData.CurrentPlayer = int.Parse(val);
+                            break;
+                        }
+                    case ("gr"):
+                        {
+                            gameData.GameRows = int.Parse(val);
+                            break;
+                        }
+                    case ("gc"):
+                        {
+                            gameData.GameColumns = int.Parse(val);
+                            break;
+                        }
+                    case ("gd"):
+                        {
+                            if ((gameData.GameColumns == 0) || (gameData.GameRows == 0))
+                            {
+                                throw new Exception("Must have Rows and columns set befor game data in savefile");
+                            }
+                            CellValues[] flatArray = Array.ConvertAll(
+                                 val.Split(','),
+                                 s => (CellValues)int.Parse(s)
+                                 );
+
+                            if (flatArray.Length != gameData.GameColumns * gameData.GameRows)
+                            {
+                                throw new Exception("Invalid amount of data points for the specified rows and columns");
+                            }
+
+                            ref CellValues[,] gvd = ref gameData.GameValsData;
+                            gvd = new CellValues[gameData.GameColumns, gameData.GameRows];
+
+                            for (int x = 0; x < gameData.GameColumns; x++)
+                            {
+
+                                for (int y = 0; y < gameData.GameRows; y++)
+                                {
+                                    /*  Reads in following order (on 3x3)
+                                    |*  ╔═══╦═══╦═══╗ *|
+                                    |*  ║ 2 ║ 5 ║ 8 ║ *|
+                                    |*  ║ 1 ║ 4 ║ 7 ║ *|
+                                    |*  ║ 0 ║ 3 ║ 6 ║ *|
+                                    |*  ╚═══╩═══╩═══╝ *|
+                                    |*________________*/
+
+                                    gvd[x, y] = flatArray[y + (x * gameData.GameColumns)];
+                                }
+                            }
+
+                            break;
+                        }
+                    default:
+                        break;
+                }
+            }
+
+            return gameData;
         }
 
         #endregion
+
     }
 }
