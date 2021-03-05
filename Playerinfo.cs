@@ -10,8 +10,18 @@ using System.Windows.Forms;
 
 namespace O_Neillo
 {
+    public enum BotDifficulty
+    {
+        Easy,
+        Normal,
+        Hard,
+        Random
+    }
+
     public partial class Playerinfo : UserControl
     {
+        private Random random = new Random();
+
         private readonly string[] aiNames = new string[] {
             "X Æ A-12",
             "Bot Jamie",
@@ -130,7 +140,7 @@ namespace O_Neillo
                 {
                     if (_ainame == null)
                     {
-                        _ainame = aiNames[new Random().Next(0, aiNames.Length)];
+                        _ainame = aiNames[random.Next(0, aiNames.Length)];
                     }
 
                     _playername = PlayerName;
@@ -145,14 +155,120 @@ namespace O_Neillo
             }
         }
 
+        private BotSettings aiSettings = new BotSettings();
+
+        public int AIthoughtSpeed = 20;
+
+        public BotDifficulty difficulty = BotDifficulty.Normal;
+
+        [Description("The Timer to use for the AI's thoughts"), Category("O'Neillo")]
+        public Timer AItimer { get; set; }
+
         public Playerinfo()
         {
             InitializeComponent();
         }
 
+        private void button1_Click(object sender, EventArgs e)
+        {
+            switch (aiSettings.ShowDialog())
+            {
+                case (DialogResult.OK):
+                    {
+                        switch (aiSettings.Difficulty.ToLower())
+                        {
+                            case "easy":
+                                {
+                                    this.difficulty = BotDifficulty.Easy;
+                                    break;
+                                }
+                            case "normal":
+                                {
+                                    this.difficulty = BotDifficulty.Normal;
+                                    break;
+                                }
+                            case "hard":
+                                {
+                                    this.difficulty = BotDifficulty.Hard;
+                                    break;
+                                }
+                            case "random":
+                                {
+                                    this.difficulty = BotDifficulty.Random;
+                                    break;
+                                }
+                            default:
+                                {
+                                    this.difficulty = BotDifficulty.Normal;
+                                    break;
+                                }
+                        }
+
+                        switch (aiSettings.Speed.ToLower())
+                        {
+                            case "slow":
+                                {
+                                    this.AIthoughtSpeed = 1000;
+                                    break;
+                                }
+                            case "fast":
+                                {
+                                    this.AIthoughtSpeed = 100;
+                                    break;
+                                }
+                            case "super fast":
+                                {
+                                    this.AIthoughtSpeed = 20;
+                                    break;
+                                }
+                            default:
+                                {
+                                    this.AIthoughtSpeed = 100;
+                                    break;
+                                }
+                        }
+
+                        break;
+                    }
+                default:
+                    break;
+            }
+        }
+
         private void chk_ai_CheckedChanged(object sender, EventArgs e)
         {
             this.isAI = chk_ai.Checked;
+        }
+
+        public CellScoreInfo aiPickSpot(CellScoreInfo[] spots)
+        {
+            if (spots.Length == 0)
+            {
+                throw new Exception("No spots passed");
+            }
+
+            switch (this.difficulty)
+            {
+                case (BotDifficulty.Easy):
+                    {
+                        return spots.OrderBy(v => v.score).ThenBy(v => random.Next(0, 1000)).First();
+                    }
+                default:
+                case (BotDifficulty.Normal):
+                    {
+                        spots = spots.OrderBy(v => v.score).ThenBy(v => random.Next(0, 1000)).ToArray();
+
+                        return spots[spots.Length / 2];
+                    }
+                case (BotDifficulty.Hard):
+                    {
+                        return spots.OrderByDescending(v => v.score).ThenBy(v => random.Next(0, 1000)).First();
+                    }
+                case (BotDifficulty.Random):
+                    {
+                        return spots[random.Next(0, spots.Length)];
+                    }
+            }
         }
     }
 }

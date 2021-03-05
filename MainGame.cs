@@ -6,6 +6,9 @@ using System.IO;
 using System.Speech.Synthesis;
 using System.Windows.Forms;
 using System.Media;
+using System.Linq;
+using System.Threading;
+using System.ComponentModel;
 
 namespace O_Neillo
 {
@@ -22,7 +25,8 @@ namespace O_Neillo
     public partial class MainGame : Form
     {
         static int SerialisationVersion = 1;
-
+        static private Random random = new Random();
+        
         #region Public classes
 
         /// <summary>
@@ -86,7 +90,6 @@ namespace O_Neillo
             public Stack<Point>[] FlankPoints = new Stack<Point>[Directions.Length];
         }
 
-
         #endregion
 
         #region Internal variables
@@ -129,6 +132,9 @@ namespace O_Neillo
         {
             InitializeComponent();
             gameGrid1.InitializeGrid();
+
+            // Improves FPS
+            DoubleBuffered = true;
 
             synth.SetOutputToDefaultAudioDevice();
             if (SaveFile != "" && File.Exists(SaveFile))
@@ -191,6 +197,9 @@ namespace O_Neillo
                 return;
             }
             NewGameDialog diag = new NewGameDialog();
+            diag.ColumnCount = gameGrid1.Columns;
+            diag.RowCount = gameGrid1.Rows;
+
             switch (diag.ShowDialog())
             {
                 case (DialogResult.OK):
@@ -208,11 +217,6 @@ namespace O_Neillo
                         break;
                     }
             }
-        }
-
-        private void gameGrid1_CellPressed_1(object sender, CellPressedEventArgs e)
-        {
-            AttemptMove(e.x, e.y);
         }
 
         /// <summary>
@@ -233,26 +237,7 @@ namespace O_Neillo
                 MustBePlayingError();
                 return;
             }
-
-            if (AnyLegalMoves())
-            {
-                Speak("A legal move was found, you can't pass.", false, true);
-                return;
-            }
-
-            //MessageBox.Show("No legal moves found, passing turn");
-            Speak("No Legal moves where found, passing your turn!");
-            if (previousPlayerPassed == true)
-            {
-                EndGame();
-            }
-            else
-            {
-                previousPlayerPassed = true;
-                SwitchPlayer();
-            }
-
-            return;
+            pass();
         }
 
         /// <summary>
@@ -310,6 +295,8 @@ namespace O_Neillo
         /// </summary>
         private void SwitchPlayer()
         {
+            if (!playing) return;
+
             currentPlayer.PlayerTurn = false;
 
             currentPlayer = (currentPlayer == playerinfo1) ? playerinfo2 : playerinfo1;
@@ -331,7 +318,8 @@ namespace O_Neillo
 
             if (!AnyLegalMoves() && playing)
             {
-                Speak($"No Legal moves found, Skipping {currentPlayer.PlayerName}'s turn", false, true);
+                if (!currentPlayer.isAI)
+                    Speak($"No Legal moves found, Skipping {currentPlayer.PlayerName}'s turn", false, true);
 
                 if (previousPlayerPassed == true)
                 {
@@ -342,6 +330,10 @@ namespace O_Neillo
                     previousPlayerPassed = true;
                     SwitchPlayer();
                 }
+            }
+            if (currentPlayer.isAI)
+            {
+                currentPlayer.AItimer.Enabled = true;
             }
         }
 
@@ -382,6 +374,7 @@ namespace O_Neillo
             currentPlayer = playerinfo1;
             this.Icon = Properties.Resources.Icon_GridBlack;
 
+            aiThoughtTimer1.Enabled = true;
             playing = true;
         }
 
@@ -390,16 +383,35 @@ namespace O_Neillo
         /// </summary>
         private void EndGame()
         {
+            aiThoughtTimer1.Enabled = false;
+            aiThoughtTimer2.Enabled = false;
             playing = false;
-            Playerinfo winner = (playerinfo1.Tokens > playerinfo2.Tokens) ? ref playerinfo1 : ref playerinfo2;
-            Speak($"Game Ended, {winner.PlayerName} won with {winner.Tokens} tokens!");
 
-            MessageBox.Show(
-                $"Game Ended, {winner.PlayerName} won with {winner.Tokens} tokens!",
-                "Game Ended",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information
-            );
+            if (playerinfo1.Tokens == playerinfo2.Tokens)
+            {
+                Speak($"Game Ended, It's a draw");
+
+                MessageBox.Show(
+                    $"Game Ended, It's a draw.",
+                    "Game Ended",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
+            }
+            else
+            {
+                Playerinfo winner = (playerinfo1.Tokens > playerinfo2.Tokens) ? ref playerinfo1 : ref playerinfo2;
+
+                Speak($"Game Ended, {winner.PlayerName} won with {winner.Tokens} tokens!");
+
+                MessageBox.Show(
+                    $"Game Ended, {winner.PlayerName} won with {winner.Tokens} tokens!",
+                    "Game Ended",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
+            }
+
         }
 
         /// <summary>
@@ -490,6 +502,8 @@ namespace O_Neillo
             SwitchPlayer();
 
             currentPlayer.Tokens -= dScore;
+
+
         }
 
         /// <summary>
@@ -547,6 +561,45 @@ namespace O_Neillo
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Calculates the change in score if you place in a certain spot
+        /// </summary>
+        /// <param name="x">The X value of the spot to check</param>
+        /// <param name="y">The Y value of the spot to check</param>
+        /// <returns>Cellscore info, with .valid indicating if it's valid, and .score saying the change in score</returns>
+        private CellScoreInfo GetMoveScore(int x, int y)
+        {
+            // make sure that even if every single cell is valid, there will be enough space in the array.
+            CellScoreInfo ret = new CellScoreInfo { x = x, y = y, score = 0 };
+
+            if (GetCell(x, y) != CellValues.blank)
+            {
+                ret.valid = false;
+            }
+            else if (!OpponentAdjacent(x, y))
+            {
+                ret.valid = false;
+            }
+            else
+            {
+                FlankInfo flanks = GetFlanks(x, y);
+
+                if (flanks.CanFlank)
+                {
+                    foreach (Stack<Point> points in flanks.FlankPoints)
+                    {
+                        ret.score += points.Count;
+                    }
+                    ret.valid = true;
+                }
+                else
+                {
+                    ret.valid = false;
+                }
+            }
+            return ret;
         }
 
         /// <summary>
@@ -745,6 +798,30 @@ namespace O_Neillo
         private void StopSpeak()
         {
             Speak("", true);
+        }
+
+
+        /// <summary>
+        /// Checks the whole board for all legal moves
+        /// </summary>
+        /// <returns>Array of legal moves, and their positions</returns>
+        private CellScoreInfo[] GetLegalMoves()
+        {
+            List<CellScoreInfo> cellList = new List<CellScoreInfo>(gameGrid1.Columns * gameGrid1.Rows);
+
+            for (int x = 0; x < gameGrid1.Columns; x++)
+            {
+                for (int y = 0; y < gameGrid1.Rows; y++)
+                {
+                    CellScoreInfo cell = GetMoveScore(x, y);
+                    if (cell.valid)
+                    {
+                        //MessageBox.Show($"found legal move {x},{y}");
+                        cellList.Add(cell);
+                    }
+                }
+            }
+            return cellList.ToArray();
         }
 
         /// <summary>
@@ -1047,7 +1124,68 @@ namespace O_Neillo
             return gameData;
         }
 
+        private void pass(bool silent = false, bool skipcheck = false)
+        {
+            // Will skip the check if skipcheck is true
+            if (!skipcheck && AnyLegalMoves())
+            {
+                if (!silent)
+                    Speak("A legal move was found, you can't pass.", false, true);
+                return;
+            }
+
+            //MessageBox.Show("No legal moves found, passing turn");
+            if (!silent)
+                Speak("No Legal moves where found, passing your turn!");
+
+            if (previousPlayerPassed == true)
+            {
+                EndGame();
+            }
+            else
+            {
+                previousPlayerPassed = true;
+                SwitchPlayer();
+            }
+        }
+
+        private void doAITurn()
+        {
+            CellScoreInfo[] moves = GetLegalMoves();
+
+            if (moves.Length == 0)
+            {
+                //Speak($"AI found no legal moves found, Skipping {currentPlayer.PlayerName}'s turn", false, true);
+                pass(true, true);
+            }
+            else
+            {
+                CellScoreInfo move = currentPlayer.aiPickSpot(moves);
+                AttemptMove(move.x, move.y);
+            }
+        }
+
         #endregion
 
+
+        private void aiThoughtTimer1_Tick(object sender, EventArgs e)
+        {
+            if (currentPlayer == playerinfo1)
+            {
+                aiThoughtTimer1.Interval = currentPlayer.AIthoughtSpeed;
+                aiThoughtTimer1.Enabled = false;
+                doAITurn();
+            }
+        }
+        private void aithoughtTimer2_Tick(object sender, EventArgs e)
+        {
+            if (currentPlayer == playerinfo2)
+            {
+                aiThoughtTimer2.Interval = currentPlayer.AIthoughtSpeed;
+                aiThoughtTimer2.Enabled = false;
+                doAITurn();
+
+            }
+        }
     }
 }

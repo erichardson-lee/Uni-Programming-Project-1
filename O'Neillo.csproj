@@ -86,6 +86,12 @@
     <Compile Include="About.Designer.cs">
       <DependentUpon>About.cs</DependentUpon>
     </Compile>
+    <Compile Include="BotSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BotSettings.Designer.cs">
+      <DependentUpon>BotSettings.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainGame.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -98,6 +104,7 @@
     <Compile Include="GameGrid.Designer.cs">
       <DependentUpon>GameGrid.cs</DependentUpon>
     </Compile>
+    <Compile Include="Misc.cs" />
     <Compile Include="NewGameDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -114,6 +121,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="About.resx">
       <DependentUpon>About.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BotSettings.resx">
+      <DependentUpon>BotSettings.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainGame.resx">
       <DependentUpon>MainGame.cs</DependentUpon>

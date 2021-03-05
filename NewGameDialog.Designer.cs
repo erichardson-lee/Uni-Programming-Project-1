@@ -103,7 +103,7 @@ namespace O_Neillo
             0,
             0});
             this.num_width.Minimum = new decimal(new int[] {
-            1,
+            4,
             0,
             0,
             0});
@@ -129,7 +129,7 @@ namespace O_Neillo
             0,
             0});
             this.num_height.Minimum = new decimal(new int[] {
-            1,
+            4,
             0,
             0,
             0});

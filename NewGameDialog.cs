@@ -18,12 +18,20 @@ namespace O_Neillo
             {
                 return decimal.ToInt32(num_width.Value);
             }
+            set
+            {
+                num_width.Value = value;
+            }
         }
         public int RowCount
         {
             get
             {
                 return decimal.ToInt32(num_height.Value);
+            }
+            set
+            {
+                num_height.Value = value;
             }
         }
 

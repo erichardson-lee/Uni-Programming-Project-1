@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace Gamegrid
 {
-
+    
     public delegate void CellPressedEventHandler(object sender, CellPressedEventArgs e);
 
 
@@ -146,7 +146,7 @@ namespace Gamegrid
                     tbl_gameGrid.Controls.Add(img, x, y);
                 }
             }
-            
+
             // Set cursor back to normal
             Cursor.Current = Cursors.Default;
 
