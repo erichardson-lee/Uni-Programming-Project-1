@@ -10,16 +10,17 @@ using System.Windows.Forms;
 
 namespace Gamegrid
 {
-    
+
     public delegate void CellPressedEventHandler(object sender, CellPressedEventArgs e);
 
 
     public partial class GameGrid : UserControl
     {
-        private class Cell : PictureBox
+        private class Cell
         {
             public int x;
             public int y;
+            public Image Image;
         }
 
         private int _rows = 8;
@@ -97,6 +98,11 @@ namespace Gamegrid
         [Description("Event Called whenever a cell is clicked"), Category("Game Grid")]
         public event CellPressedEventHandler CellPressed;
 
+        public Graphics gridGraphics;
+
+        private int GridCellWidth, GridCellHeight;
+        private int GridWidth, GridHeight;
+
         /// <summary>
         /// Initializes the grid with it's default squares
         /// </summary>
@@ -107,67 +113,69 @@ namespace Gamegrid
                 //MessageBox.Show($"Col: {_columns}, Row: {_rows}");
                 return;
             }
+
+            if (DefaultImage != null)
+            {
+                GridCellWidth = DefaultImage.Width;
+                GridCellHeight = DefaultImage.Height;
+            }
+            else
+            {
+                GridCellWidth = 512;
+                GridCellHeight = 512;
+                return;
+            }
+
+            const int maxdim = 2048;
+
+            if (GridCellWidth * Columns > maxdim || GridCellHeight * Rows > maxdim)
+            {
+                if (Columns > Rows)
+                {
+                    GridCellHeight = maxdim / Rows;
+                    GridCellWidth = GridCellHeight;
+                }
+                else
+                {
+                    GridCellWidth = maxdim / Rows;
+                    GridCellHeight = GridCellWidth;
+                }
+            }
+
             // set cursor to wait one
             Cursor.Current = Cursors.WaitCursor;
 
             _grid = new Cell[Columns, Rows];
 
-            tbl_gameGrid.Controls.Clear();
-            tbl_gameGrid.ColumnStyles.Clear();
-            tbl_gameGrid.RowStyles.Clear();
+            GridWidth = GridCellWidth * Columns;
+            GridHeight = GridCellHeight * Rows;
 
-            tbl_gameGrid.ColumnCount = Columns;
-            tbl_gameGrid.RowCount = Rows;
+            grid_picturebox.Image = new Bitmap(GridWidth, GridHeight);
+            gridGraphics = Graphics.FromImage(grid_picturebox.Image);
 
-            for (int row = 0; row < Rows; row++)
+            for (int x = 0; x < Columns; x++)
             {
-                tbl_gameGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            }
-            for (int column = 0; column < Columns; column++)
-            {
-                tbl_gameGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-            }
-
-            for (int y = 0; y < Rows; y++)
-            {
-                for (int x = 0; x < Columns; x++)
+                for (int y = 0; y < Rows; y++)
                 {
-                    // Flips y axis, so _grid [1,1] is bottom left,
-                    // +'ve X is going right, and +'ve Y is going up.
-                    ref Cell img = ref _grid[x, Rows - (y + 1)];
-
-                    img = new Cell() { Image = _defaultImage };
-                    img.Dock = DockStyle.Fill;
-                    img.SizeMode = PictureBoxSizeMode.StretchImage;
-                    img.Margin = new Padding(0);
-                    img.x = x;
-                    img.y = Rows - (y + 1);
-                    img.Click += Img_Click;
-                    tbl_gameGrid.Controls.Add(img, x, y);
+                    SetCell(x, y, DefaultImage, false);
                 }
             }
+
+            grid_picturebox.Refresh();
 
             // Set cursor back to normal
             Cursor.Current = Cursors.Default;
 
-            ResizeTable();
         }
 
-        /// <summary>
-        /// Event called whenever any image gets clicked
-        /// </summary>
-        private void Img_Click(object sender, EventArgs e)
-        {
-            Cell cell = (Cell)sender;
-            CellPressedEventArgs args = new CellPressedEventArgs();
+        ///// <summary>
+        ///// Event called whenever any image gets clicked
+        ///// </summary>
+        //private void Img_Click(object sender, EventArgs e)
+        //{
+        //    CellPressed?.Invoke(cell, args);
 
-            args.cell = cell;
-            args.x = cell.x;
-            args.y = cell.y;
-
-            CellPressed?.Invoke(cell, args);
-
-        }
+        //}
 
         /// <summary>
         /// Set the image of a cell on the grid
@@ -175,9 +183,20 @@ namespace Gamegrid
         /// <param name="x">X value of the cell</param>
         /// <param name="y">Y value of the cell</param>
         /// <param name="img">Image to set it to.</param>
-        public void SetCell(int x, int y, Image img)
+        public void SetCell(int x, int y, Image img, bool refreshImage = true)
         {
-            _grid[x, y].Image = img;
+            int imgx = x * GridCellWidth;
+            int imgy = y * GridCellHeight;
+            //int imgy = (Rows - (y + 1)) * GridCellHeight;
+            gridGraphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
+            gridGraphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+
+            gridGraphics.DrawImage(img, imgx, imgy, GridCellWidth, GridCellHeight);
+            gridGraphics.DrawRectangle(Pens.Black, imgx, imgy, GridCellWidth, GridCellHeight);
+
+            if (refreshImage) grid_picturebox.Refresh();
+
+            //_grid[x, y].Image = img;
         }
 
         /// <summary>
@@ -191,33 +210,75 @@ namespace Gamegrid
             return _grid[x, y].Image;
         }
 
-        /// <summary>
-        /// If the component changes size, resize the grid so it stays square and goes as big as possible
-        /// </summary>
-        private void tbl_centerformat_Paint(object sender, PaintEventArgs e)
+        private void grid_picturebox_Click(object sender, EventArgs e)
         {
-            ResizeTable();
+            Point pos = TranslateZoomMousePosition(grid_picturebox.PointToClient(MousePosition), grid_picturebox.Image, grid_picturebox.Width, grid_picturebox.Height);
+
+            if ((pos.X >= 0 && pos.X < GridWidth) && (pos.Y >= 0 && pos.Y < GridHeight))
+            {
+
+                CellPressedEventArgs args = new CellPressedEventArgs();
+
+                args.x = pos.X / GridCellWidth;
+                args.y = pos.Y / GridCellHeight;
+
+                if ((args.x >= 0 && args.x < Columns) && (args.y >= 0 && args.y < Rows))
+                {
+                    CellPressed?.Invoke(sender, args);
+                }
+            }
+        }
+        public void Refresh()
+        {
+            grid_picturebox.Refresh();
         }
 
-        /// <summary>
-        /// Resizes the table to have square cells
-        /// </summary>
-        private void ResizeTable()
-        {
-            int workspaceHeightPerRow = tbl_centerformat.Height / Rows;
-            int workspaceWidthPerColumn = tbl_centerformat.Width / Columns;
 
-            // Use number of columns/ rows multiplied by the smaller value
-            if (workspaceHeightPerRow > workspaceWidthPerColumn)
+        // Code modified from https://www.codeproject.com/Articles/20923/Mouse-Position-over-Image-in-a-PictureBox
+        // Translates clicked position on the image to co-ordinates on the image
+        protected Point TranslateZoomMousePosition(Point coordinates, Image image, int width, int height)
+        {
+            // test to make sure our image is not null
+            if (image == null) return coordinates;
+
+            // Make sure our control width and height are not 0 and our 
+            // image width and height are not 0
+            if (width == 0 || height == 0 || image.Width == 0 || image.Height == 0) return coordinates;
+
+            // This is the one that gets a little tricky. Essentially, need to check 
+            // the aspect ratio of the image to the aspect ratio of the control
+            // to determine how it is being rendered
+            float imageAspect = (float)image.Width / image.Height;
+            float controlAspect = (float)width / height;
+            float newX = coordinates.X;
+            float newY = coordinates.Y;
+            if (imageAspect > controlAspect)
             {
-                tbl_gameGrid.Height = workspaceWidthPerColumn * Rows;
-                tbl_gameGrid.Width = workspaceWidthPerColumn * Columns;
+                // This means that we are limited by width, 
+                // meaning the image fills up the entire control from left to right
+                float ratioWidth = (float)image.Width / width;
+                newX *= ratioWidth;
+                float scale = (float)width / image.Width;
+                float displayHeight = scale * image.Height;
+                float diffHeight = height - displayHeight;
+                diffHeight /= 2;
+                newY -= diffHeight;
+                newY /= scale;
             }
             else
             {
-                tbl_gameGrid.Height = workspaceHeightPerRow * Rows;
-                tbl_gameGrid.Width = workspaceHeightPerRow * Columns;
+                // This means that we are limited by height, 
+                // meaning the image fills up the entire control from top to bottom
+                float ratioHeight = (float)image.Height / height;
+                newY *= ratioHeight;
+                float scale = (float)height / image.Height;
+                float displayWidth = scale * image.Width;
+                float diffWidth = Width - displayWidth;
+                diffWidth /= 2;
+                newX -= diffWidth;
+                newX /= scale;
             }
+            return new Point((int)newX, (int)newY);
         }
     }
 

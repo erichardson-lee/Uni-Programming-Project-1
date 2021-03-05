@@ -33,11 +33,8 @@ namespace O_Neillo
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainGame));
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.playerinfo2 = new O_Neillo.Playerinfo();
             this.aiThoughtTimer2 = new System.Windows.Forms.Timer(this.components);
-            this.playerinfo1 = new O_Neillo.Playerinfo();
             this.aiThoughtTimer1 = new System.Windows.Forms.Timer(this.components);
-            this.gameGrid1 = new Gamegrid.GameGrid();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.gameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.startGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -52,6 +49,9 @@ namespace O_Neillo
             this.txt_speech = new System.Windows.Forms.ToolStripTextBox();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.playerinfo2 = new O_Neillo.Playerinfo();
+            this.playerinfo1 = new O_Neillo.Playerinfo();
+            this.gameGrid1 = new Gamegrid.GameGrid();
             this.tableLayoutPanel1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -74,59 +74,14 @@ namespace O_Neillo
             this.tableLayoutPanel1.Size = new System.Drawing.Size(667, 764);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
-            // playerinfo2
-            // 
-            this.playerinfo2.AItimer = this.aiThoughtTimer2;
-            this.playerinfo2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.playerinfo2.CellValue = O_Neillo.CellValues.white;
-            this.playerinfo2.Dock = System.Windows.Forms.DockStyle.Right;
-            this.playerinfo2.isAI = false;
-            this.playerinfo2.Location = new System.Drawing.Point(336, 673);
-            this.playerinfo2.Name = "playerinfo2";
-            this.playerinfo2.PlayerIcon = global::O_Neillo.Properties.Resources.GridWhite;
-            this.playerinfo2.PlayerName = "";
-            this.playerinfo2.PlayerTurn = false;
-            this.playerinfo2.Size = new System.Drawing.Size(328, 88);
-            this.playerinfo2.TabIndex = 5;
-            this.playerinfo2.Tokens = 0;
-            // 
             // aiThoughtTimer2
             // 
             this.aiThoughtTimer2.Tick += new System.EventHandler(this.aithoughtTimer2_Tick);
-            // 
-            // playerinfo1
-            // 
-            this.playerinfo1.AItimer = this.aiThoughtTimer1;
-            this.playerinfo1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.playerinfo1.CellValue = O_Neillo.CellValues.black;
-            this.playerinfo1.Dock = System.Windows.Forms.DockStyle.Left;
-            this.playerinfo1.isAI = false;
-            this.playerinfo1.Location = new System.Drawing.Point(3, 673);
-            this.playerinfo1.Name = "playerinfo1";
-            this.playerinfo1.PlayerIcon = global::O_Neillo.Properties.Resources.GridBlack;
-            this.playerinfo1.PlayerName = "";
-            this.playerinfo1.PlayerTurn = false;
-            this.playerinfo1.Size = new System.Drawing.Size(327, 88);
-            this.playerinfo1.TabIndex = 6;
-            this.playerinfo1.Tokens = 0;
             // 
             // aiThoughtTimer1
             // 
             this.aiThoughtTimer1.Interval = 20;
             this.aiThoughtTimer1.Tick += new System.EventHandler(this.aiThoughtTimer1_Tick);
-            // 
-            // gameGrid1
-            // 
-            this.gameGrid1.Columns = 8;
-            this.tableLayoutPanel1.SetColumnSpan(this.gameGrid1, 2);
-            this.gameGrid1.DefaultImage = global::O_Neillo.Properties.Resources.GridBase;
-            this.gameGrid1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gameGrid1.Location = new System.Drawing.Point(3, 3);
-            this.gameGrid1.Name = "gameGrid1";
-            this.gameGrid1.Rows = 8;
-            this.gameGrid1.Size = new System.Drawing.Size(661, 664);
-            this.gameGrid1.TabIndex = 7;
-            this.gameGrid1.CellPressed += new Gamegrid.CellPressedEventHandler(this.gameGrid1_CellPressed);
             // 
             // menuStrip1
             // 
@@ -233,6 +188,51 @@ namespace O_Neillo
             // 
             this.openFileDialog1.DefaultExt = "*.ej";
             this.openFileDialog1.Filter = "\"O\'neillo Saves\"|*.ej|\"All Files\"|*.*";
+            // 
+            // playerinfo2
+            // 
+            this.playerinfo2.AItimer = this.aiThoughtTimer2;
+            this.playerinfo2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.playerinfo2.CellValue = O_Neillo.CellValues.white;
+            this.playerinfo2.Dock = System.Windows.Forms.DockStyle.Right;
+            this.playerinfo2.isAI = false;
+            this.playerinfo2.Location = new System.Drawing.Point(336, 673);
+            this.playerinfo2.Name = "playerinfo2";
+            this.playerinfo2.PlayerIcon = global::O_Neillo.Properties.Resources.GridWhite;
+            this.playerinfo2.PlayerName = "";
+            this.playerinfo2.PlayerTurn = false;
+            this.playerinfo2.Size = new System.Drawing.Size(328, 88);
+            this.playerinfo2.TabIndex = 1;
+            this.playerinfo2.Tokens = 0;
+            // 
+            // playerinfo1
+            // 
+            this.playerinfo1.AItimer = this.aiThoughtTimer1;
+            this.playerinfo1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.playerinfo1.CellValue = O_Neillo.CellValues.black;
+            this.playerinfo1.Dock = System.Windows.Forms.DockStyle.Left;
+            this.playerinfo1.isAI = false;
+            this.playerinfo1.Location = new System.Drawing.Point(3, 673);
+            this.playerinfo1.Name = "playerinfo1";
+            this.playerinfo1.PlayerIcon = global::O_Neillo.Properties.Resources.GridBlack;
+            this.playerinfo1.PlayerName = "";
+            this.playerinfo1.PlayerTurn = false;
+            this.playerinfo1.Size = new System.Drawing.Size(327, 88);
+            this.playerinfo1.TabIndex = 0;
+            this.playerinfo1.Tokens = 0;
+            // 
+            // gameGrid1
+            // 
+            this.gameGrid1.Columns = 8;
+            this.tableLayoutPanel1.SetColumnSpan(this.gameGrid1, 2);
+            this.gameGrid1.DefaultImage = global::O_Neillo.Properties.Resources.GridBase;
+            this.gameGrid1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gameGrid1.Location = new System.Drawing.Point(3, 3);
+            this.gameGrid1.Name = "gameGrid1";
+            this.gameGrid1.Rows = 8;
+            this.gameGrid1.Size = new System.Drawing.Size(661, 664);
+            this.gameGrid1.TabIndex = 7;
+            this.gameGrid1.CellPressed += new Gamegrid.CellPressedEventHandler(this.gameGrid1_CellPressed);
             // 
             // MainGame
             // 

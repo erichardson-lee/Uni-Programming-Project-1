@@ -98,7 +98,7 @@ namespace O_Neillo
             this.num_width.AutoSize = true;
             this.num_width.Location = new System.Drawing.Point(78, 3);
             this.num_width.Maximum = new decimal(new int[] {
-            64,
+            100000,
             0,
             0,
             0});
@@ -124,7 +124,7 @@ namespace O_Neillo
             this.num_height.AutoSize = true;
             this.num_height.Location = new System.Drawing.Point(78, 29);
             this.num_height.Maximum = new decimal(new int[] {
-            64,
+            100000,
             0,
             0,
             0});

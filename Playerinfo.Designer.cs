@@ -149,6 +149,7 @@ namespace O_Neillo
             this.chk_ai.Name = "chk_ai";
             this.chk_ai.Size = new System.Drawing.Size(24, 31);
             this.chk_ai.TabIndex = 5;
+            this.chk_ai.TabStop = false;
             this.chk_ai.Text = "AI";
             this.chk_ai.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.chk_ai.UseVisualStyleBackColor = true;
@@ -160,6 +161,7 @@ namespace O_Neillo
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(15, 23);
             this.button1.TabIndex = 6;
+            this.button1.TabStop = false;
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 

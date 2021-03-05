@@ -26,7 +26,7 @@ namespace O_Neillo
     {
         static int SerialisationVersion = 1;
         static private Random random = new Random();
-        
+
         #region Public classes
 
         /// <summary>
@@ -359,10 +359,12 @@ namespace O_Neillo
             int cx = gameGrid1.Columns / 2;
             int cy = gameGrid1.Rows / 2;
 
-            SetCell(cx - 1, cy - 1, CellValues.black);
-            SetCell(cx, cy, CellValues.black);
-            SetCell(cx, cy - 1, CellValues.white);
-            SetCell(cx - 1, cy, CellValues.white);
+            SetCell(cx - 1, cy - 1, CellValues.white, false);
+            SetCell(cx, cy, CellValues.white, false);
+            SetCell(cx, cy - 1, CellValues.black, false);
+            SetCell(cx - 1, cy, CellValues.black, false);
+
+            gameGrid1.Refresh();
 
             playerinfo1.Tokens = 2;
             playerinfo1.PlayerTurn = true;
@@ -374,7 +376,7 @@ namespace O_Neillo
             currentPlayer = playerinfo1;
             this.Icon = Properties.Resources.Icon_GridBlack;
 
-            aiThoughtTimer1.Enabled = true;
+            if (playerinfo1.isAI) aiThoughtTimer1.Enabled = true;
             playing = true;
         }
 
@@ -486,15 +488,15 @@ namespace O_Neillo
                     {
                         Point p = points.Pop();
 
-                        SetCell(p.X, p.Y, currentPlayer.CellValue);
+                        SetCell(p.X, p.Y, currentPlayer.CellValue, false);
 
                         dScore++;
                     }
-                }
 
+                }
             }
 
-            SetCell(x, y, currentPlayer.CellValue);
+            SetCell(x, y, currentPlayer.CellValue, true);
             Speak($"{currentPlayer.PlayerName} placed a token at grid{x + 1}, {y + 1} and flipped {dScore} {(dScore > 1 ? "tokens" : "token")}.", true);
             previousPlayerPassed = false;
             currentPlayer.Tokens += dScore + 1;
@@ -512,17 +514,18 @@ namespace O_Neillo
         /// <param name="x">The X value of the cell to set</param>
         /// <param name="y">The Y value of the cell to set</param>
         /// <param name="val">The Value to set the cell to</param>
-        private void SetCell(int x, int y, CellValues val)
+        /// <param name="refreshImage">Whether or not to refresh the image</param>
+        private void SetCell(int x, int y, CellValues val, bool refreshImage)
         {
             gameVals[x, y] = val;
 
             if (val == CellValues.black)
             {
-                gameGrid1.SetCell(x, y, GridBlack);
+                gameGrid1.SetCell(x, y, GridBlack, refreshImage);
             }
             else if (val == CellValues.white)
             {
-                gameGrid1.SetCell(x, y, GridWhite);
+                gameGrid1.SetCell(x, y, GridWhite, refreshImage);
             }
         }
 
@@ -857,9 +860,10 @@ namespace O_Neillo
             {
                 for (int y = 0; y < newVals.GetLength(1); y++)
                 {
-                    SetCell(x, y, gameVals[x, y]);
+                    SetCell(x, y, gameVals[x, y], false);
                 }
             }
+            gameGrid1.Refresh();
         }
 
         /// <summary>

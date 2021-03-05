@@ -29,60 +29,36 @@ namespace Gamegrid
         /// </summary>
         private void InitializeComponent()
         {
-            this.tbl_gameGrid = new System.Windows.Forms.TableLayoutPanel();
-            this.tbl_centerformat = new System.Windows.Forms.TableLayoutPanel();
-            this.tbl_centerformat.SuspendLayout();
+            this.grid_picturebox = new System.Windows.Forms.PictureBox();
+            ((System.ComponentModel.ISupportInitialize)(this.grid_picturebox)).BeginInit();
             this.SuspendLayout();
             // 
-            // tbl_gameGrid
+            // grid_picturebox
             // 
-            this.tbl_gameGrid.ColumnCount = 3;
-            this.tbl_gameGrid.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.tbl_gameGrid.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.tbl_gameGrid.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.tbl_gameGrid.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tbl_gameGrid.Location = new System.Drawing.Point(196, 67);
-            this.tbl_gameGrid.Margin = new System.Windows.Forms.Padding(0);
-            this.tbl_gameGrid.Name = "tbl_gameGrid";
-            this.tbl_gameGrid.RowCount = 2;
-            this.tbl_gameGrid.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tbl_gameGrid.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tbl_gameGrid.Size = new System.Drawing.Size(600, 400);
-            this.tbl_gameGrid.TabIndex = 0;
-            // 
-            // tbl_centerformat
-            // 
-            this.tbl_centerformat.ColumnCount = 3;
-            this.tbl_centerformat.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tbl_centerformat.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tbl_centerformat.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tbl_centerformat.Controls.Add(this.tbl_gameGrid, 1, 1);
-            this.tbl_centerformat.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tbl_centerformat.Location = new System.Drawing.Point(0, 0);
-            this.tbl_centerformat.Name = "tbl_centerformat";
-            this.tbl_centerformat.RowCount = 3;
-            this.tbl_centerformat.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tbl_centerformat.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tbl_centerformat.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tbl_centerformat.Size = new System.Drawing.Size(993, 534);
-            this.tbl_centerformat.TabIndex = 1;
-            this.tbl_centerformat.Paint += new System.Windows.Forms.PaintEventHandler(this.tbl_centerformat_Paint);
+            this.grid_picturebox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.grid_picturebox.Image = global::O_Neillo.Properties.Resources.GameBoard;
+            this.grid_picturebox.Location = new System.Drawing.Point(0, 0);
+            this.grid_picturebox.Name = "grid_picturebox";
+            this.grid_picturebox.Size = new System.Drawing.Size(993, 534);
+            this.grid_picturebox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.grid_picturebox.TabIndex = 1;
+            this.grid_picturebox.TabStop = false;
+            this.grid_picturebox.Click += new System.EventHandler(this.grid_picturebox_Click);
             // 
             // GameGrid
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.tbl_centerformat);
+            this.Controls.Add(this.grid_picturebox);
             this.Name = "GameGrid";
             this.Size = new System.Drawing.Size(993, 534);
-            this.tbl_centerformat.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.grid_picturebox)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.TableLayoutPanel tbl_gameGrid;
-        private System.Windows.Forms.TableLayoutPanel tbl_centerformat;
+        private System.Windows.Forms.PictureBox grid_picturebox;
     }
 }
