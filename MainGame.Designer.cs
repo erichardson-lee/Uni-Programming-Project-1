@@ -33,9 +33,6 @@ namespace O_Neillo
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainGame));
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.playerinfo2 = new O_Neillo.Playerinfo();
-            this.playerinfo1 = new O_Neillo.Playerinfo();
-            this.gameGrid1 = new Gamegrid.GameGrid();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.gameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.startGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -50,6 +47,9 @@ namespace O_Neillo
             this.txt_speech = new System.Windows.Forms.ToolStripTextBox();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.playerinfo2 = new O_Neillo.Playerinfo();
+            this.playerinfo1 = new O_Neillo.Playerinfo();
+            this.gameGrid1 = new Gamegrid.GameGrid();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
@@ -80,45 +80,6 @@ namespace O_Neillo
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(667, 93);
             this.panel1.TabIndex = 2;
-            // 
-            // playerinfo2
-            // 
-            this.playerinfo2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.playerinfo2.CellValue = O_Neillo.CellValues.white;
-            this.playerinfo2.Location = new System.Drawing.Point(335, 3);
-            this.playerinfo2.Name = "playerinfo2";
-            this.playerinfo2.PlayerIcon = global::O_Neillo.Properties.Resources.GridWhite;
-            this.playerinfo2.PlayerName = "";
-            this.playerinfo2.PlayerTurn = false;
-            this.playerinfo2.Size = new System.Drawing.Size(329, 87);
-            this.playerinfo2.TabIndex = 1;
-            this.playerinfo2.Tokens = 0;
-            // 
-            // playerinfo1
-            // 
-            this.playerinfo1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.playerinfo1.CellValue = O_Neillo.CellValues.black;
-            this.playerinfo1.Location = new System.Drawing.Point(3, 3);
-            this.playerinfo1.Name = "playerinfo1";
-            this.playerinfo1.PlayerIcon = global::O_Neillo.Properties.Resources.GridBlack;
-            this.playerinfo1.PlayerName = "";
-            this.playerinfo1.PlayerTurn = false;
-            this.playerinfo1.Size = new System.Drawing.Size(329, 87);
-            this.playerinfo1.TabIndex = 0;
-            this.playerinfo1.Tokens = 0;
-            // 
-            // gameGrid1
-            // 
-            this.gameGrid1.Columns = 8;
-            this.gameGrid1.DefaultImage = global::O_Neillo.Properties.Resources.GridBase;
-            this.gameGrid1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gameGrid1.Location = new System.Drawing.Point(0, 0);
-            this.gameGrid1.Margin = new System.Windows.Forms.Padding(0);
-            this.gameGrid1.Name = "gameGrid1";
-            this.gameGrid1.Rows = 8;
-            this.gameGrid1.Size = new System.Drawing.Size(667, 671);
-            this.gameGrid1.TabIndex = 3;
-            this.gameGrid1.CellPressed += new Gamegrid.CellPressedEventHandler(this.gameGrid1_CellPressed);
             // 
             // menuStrip1
             // 
@@ -197,7 +158,7 @@ namespace O_Neillo
             // 
             this.chk_speak.CheckOnClick = true;
             this.chk_speak.Name = "chk_speak";
-            this.chk_speak.Size = new System.Drawing.Size(180, 22);
+            this.chk_speak.Size = new System.Drawing.Size(105, 22);
             this.chk_speak.Text = "Speak";
             this.chk_speak.Click += new System.EventHandler(this.chk_speak_Click);
             // 
@@ -225,6 +186,45 @@ namespace O_Neillo
             // 
             this.openFileDialog1.DefaultExt = "*.ej";
             this.openFileDialog1.Filter = "\"O\'neillo Saves\"|*.ej|\"All Files\"|*.*";
+            // 
+            // playerinfo2
+            // 
+            this.playerinfo2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.playerinfo2.CellValue = O_Neillo.CellValues.white;
+            this.playerinfo2.Location = new System.Drawing.Point(335, 3);
+            this.playerinfo2.Name = "playerinfo2";
+            this.playerinfo2.PlayerIcon = global::O_Neillo.Properties.Resources.GridWhite;
+            this.playerinfo2.PlayerName = "";
+            this.playerinfo2.PlayerTurn = false;
+            this.playerinfo2.Size = new System.Drawing.Size(329, 87);
+            this.playerinfo2.TabIndex = 1;
+            this.playerinfo2.Tokens = 0;
+            // 
+            // playerinfo1
+            // 
+            this.playerinfo1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.playerinfo1.CellValue = O_Neillo.CellValues.black;
+            this.playerinfo1.Location = new System.Drawing.Point(3, 3);
+            this.playerinfo1.Name = "playerinfo1";
+            this.playerinfo1.PlayerIcon = global::O_Neillo.Properties.Resources.GridBlack;
+            this.playerinfo1.PlayerName = "";
+            this.playerinfo1.PlayerTurn = false;
+            this.playerinfo1.Size = new System.Drawing.Size(329, 87);
+            this.playerinfo1.TabIndex = 0;
+            this.playerinfo1.Tokens = 0;
+            // 
+            // gameGrid1
+            // 
+            this.gameGrid1.Columns = 8;
+            this.gameGrid1.DefaultImage = global::O_Neillo.Properties.Resources.GridBase;
+            this.gameGrid1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gameGrid1.Location = new System.Drawing.Point(0, 0);
+            this.gameGrid1.Margin = new System.Windows.Forms.Padding(0);
+            this.gameGrid1.Name = "gameGrid1";
+            this.gameGrid1.Rows = 8;
+            this.gameGrid1.Size = new System.Drawing.Size(667, 671);
+            this.gameGrid1.TabIndex = 3;
+            this.gameGrid1.CellPressed += new Gamegrid.CellPressedEventHandler(this.gameGrid1_CellPressed);
             // 
             // MainGame
             // 

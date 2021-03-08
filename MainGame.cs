@@ -109,6 +109,11 @@ namespace O_Neillo
         Playerinfo currentPlayer;
 
         /// <summary>
+        /// Stores which player's not currently playing
+        /// </summary>
+        Playerinfo otherPlayer;
+
+        /// <summary>
         /// Stores if the previous player passed (If both pass, game ends)
         /// </summary>
         bool previousPlayerPassed;
@@ -289,6 +294,8 @@ namespace O_Neillo
         /// </summary>
         private void SwitchPlayer()
         {
+            otherPlayer = currentPlayer;
+
             currentPlayer.PlayerTurn = false;
 
             currentPlayer = (currentPlayer == playerinfo1) ? playerinfo2 : playerinfo1;
@@ -357,6 +364,7 @@ namespace O_Neillo
             Speak($"Starting Game, {playerinfo1.PlayerName} as black versus {playerinfo2.PlayerName} as white.", true);
 
             currentPlayer = playerinfo1;
+            otherPlayer = playerinfo2;
             this.Icon = Properties.Resources.Icon_GridBlack;
 
             playing = true;
@@ -463,9 +471,9 @@ namespace O_Neillo
             previousPlayerPassed = false;
             currentPlayer.Tokens += dScore + 1;
 
-            SwitchPlayer();
+            otherPlayer.Tokens -= dScore;
 
-            currentPlayer.Tokens -= dScore;
+            SwitchPlayer();
         }
 
         /// <summary>
@@ -818,6 +826,8 @@ namespace O_Neillo
         private void LoadGame(GameData gd)
         {
             currentPlayer = (playerinfo1.CellValue == (CellValues)gd.CurrentPlayer) ? playerinfo1 : playerinfo2;
+            otherPlayer = (playerinfo1.CellValue != (CellValues)gd.CurrentPlayer) ? playerinfo1 : playerinfo2;
+
             playerinfo1.PlayerName = gd.Player1Name;
             playerinfo1.Tokens = gd.Player1Score;
 
@@ -834,7 +844,6 @@ namespace O_Neillo
             playerinfo2.PlayerTurn = false;
             currentPlayer.PlayerTurn = true;
         }
-
 
         /// <summary>
         /// Converts the supplied gamedata to a string (Mainly for saving to a file)

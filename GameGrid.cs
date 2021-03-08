@@ -75,7 +75,9 @@ namespace Gamegrid
             set
             {
                 _defaultImage = value;
-                InitializeGrid();
+
+                if (DesignMode)
+                    InitializeGrid();
             }
         }
 
@@ -100,16 +102,15 @@ namespace Gamegrid
         /// </summary>
         public void InitializeGrid()
         {
-            if (Columns == 0 || Rows == 0)
+            if (Columns <= 0 || Rows <= 0)
             {
                 //MessageBox.Show($"Col: {_columns}, Row: {_rows}");
                 return;
             }
+            // set cursor to wait one
+            Cursor.Current = Cursors.WaitCursor;
 
             _grid = new Cell[Columns, Rows];
-
-            int colWidth = 100 / Columns;
-            int rowHeight = 100 / Rows;
 
             tbl_gameGrid.Controls.Clear();
             tbl_gameGrid.ColumnStyles.Clear();
@@ -118,13 +119,19 @@ namespace Gamegrid
             tbl_gameGrid.ColumnCount = Columns;
             tbl_gameGrid.RowCount = Rows;
 
+            for (int row = 0; row < Rows; row++)
+            {
+                tbl_gameGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+            }
+            for (int column = 0; column < Columns; column++)
+            {
+                tbl_gameGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            }
+
             for (int y = 0; y < Rows; y++)
             {
-                tbl_gameGrid.RowStyles.Add(new RowStyle(SizeType.Percent, rowHeight));
                 for (int x = 0; x < Columns; x++)
                 {
-                    tbl_gameGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, colWidth));
-
                     // Flips y axis, so _grid [1,1] is bottom left,
                     // +'ve X is going right, and +'ve Y is going up.
                     ref Cell img = ref _grid[x, Rows - (y + 1)];
@@ -139,8 +146,16 @@ namespace Gamegrid
                     tbl_gameGrid.Controls.Add(img, x, y);
                 }
             }
+
+            // Set cursor back to normal
+            Cursor.Current = Cursors.Default;
+
+            ResizeTable();
         }
 
+        /// <summary>
+        /// Event called whenever any image gets clicked
+        /// </summary>
         private void Img_Click(object sender, EventArgs e)
         {
             Cell cell = (Cell)sender;
@@ -179,20 +194,31 @@ namespace Gamegrid
         /// <summary>
         /// If the component changes size, resize the grid so it stays square and goes as big as possible
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void tbl_centerformat_Paint(object sender, PaintEventArgs e)
         {
-            if (tbl_centerformat.Height > tbl_centerformat.Width)
+            ResizeTable();
+        }
+
+        /// <summary>
+        /// Resizes the table to have square cells
+        /// </summary>
+        private void ResizeTable()
+        {
+            int workspaceHeightPerRow = tbl_centerformat.Height / Rows;
+            int workspaceWidthPerColumn = tbl_centerformat.Width / Columns;
+
+            // Use number of columns/ rows multiplied by the smaller value
+            if (workspaceHeightPerRow > workspaceWidthPerColumn)
             {
-                tbl_gameGrid.Height = tbl_gameGrid.Width = tbl_centerformat.Width;
+                tbl_gameGrid.Height = workspaceWidthPerColumn * Rows;
+                tbl_gameGrid.Width = workspaceWidthPerColumn * Columns;
             }
             else
             {
-                tbl_gameGrid.Height = tbl_gameGrid.Width = tbl_centerformat.Height;
+                tbl_gameGrid.Height = workspaceHeightPerRow * Rows;
+                tbl_gameGrid.Width = workspaceHeightPerRow * Columns;
             }
         }
-
     }
 
     public class CellPressedEventArgs : EventArgs
