@@ -10,10 +10,16 @@ using System.Windows.Forms;
 
 namespace Gamegrid
 {
-
+    /// <summary>
+    /// Event handler for whenever a cell is pressed
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     public delegate void CellPressedEventHandler(object sender, CellPressedEventArgs e);
 
-
+    /// <summary>
+    /// Allows you to display a grid of square images which you can change individual images on.
+    /// </summary>
     public partial class GameGrid : UserControl
     {
         private class Cell : PictureBox
@@ -23,6 +29,10 @@ namespace Gamegrid
         }
 
         private int _rows = 8;
+
+        /// <summary>
+        /// The number of rows to diplay on the grid.
+        /// </summary>
         [Description("The number of rows to display"), Category("Game Grid")]
         public int Rows
         {
@@ -39,6 +49,9 @@ namespace Gamegrid
         }
 
         private int _columns = 8;
+        /// <summary>
+        /// The number of columns to display on the grid
+        /// </summary>
         [Description("The number of columns to display"), Category("Game Grid")]
         public int Columns
         {
@@ -65,6 +78,10 @@ namespace Gamegrid
         //}
 
         private Image _defaultImage;
+
+        /// <summary>
+        ///  the image to display on the grid by default
+        /// </summary>
         [Description("The default image to use when populating the board"), Category("Game Grid")]
         public Image DefaultImage
         {
@@ -81,6 +98,9 @@ namespace Gamegrid
             }
         }
 
+        /// <summary>
+        /// Initialised the class
+        /// </summary>
         public GameGrid()
         {
             InitializeComponent();
@@ -94,6 +114,9 @@ namespace Gamegrid
             }
         }
 
+        /// <summary>
+        /// This event is called whenever any cell is clicked, conrtains the position of the cell in the event args
+        /// </summary>
         [Description("Event Called whenever a cell is clicked"), Category("Game Grid")]
         public event CellPressedEventHandler CellPressed;
 
@@ -159,14 +182,13 @@ namespace Gamegrid
         private void Img_Click(object sender, EventArgs e)
         {
             Cell cell = (Cell)sender;
-            CellPressedEventArgs args = new CellPressedEventArgs();
-
-            args.cell = cell;
-            args.x = cell.x;
-            args.y = cell.y;
+            var args = new CellPressedEventArgs
+            {
+                x = cell.x,
+                y = cell.y
+            };
 
             CellPressed?.Invoke(cell, args);
-
         }
 
         /// <summary>
@@ -194,7 +216,7 @@ namespace Gamegrid
         /// <summary>
         /// If the component changes size, resize the grid so it stays square and goes as big as possible
         /// </summary>
-        private void tbl_centerformat_Paint(object sender, PaintEventArgs e)
+        private void Table_Center_Paint(object sender, PaintEventArgs e)
         {
             ResizeTable();
         }
@@ -221,10 +243,18 @@ namespace Gamegrid
         }
     }
 
+    /// <summary>
+    /// The event arguments that are passed whenever a cell is clicked
+    /// </summary>
     public class CellPressedEventArgs : EventArgs
     {
-        public PictureBox cell;
+        /// <summary>
+        /// The X value of the cell
+        /// </summary>
         public int x;
+        /// <summary>
+        /// The Y value of the cell
+        /// </summary>
         public int y;
     }
 }

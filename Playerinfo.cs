@@ -15,6 +15,9 @@ namespace O_Neillo
 
 
         private int _tokens;
+        /// <summary>
+        /// The current amount of cells held by the player
+        /// </summary>
         [Description("Current number of tokens held by the player"), Category("O'Neillo")]
         public int Tokens
         {
@@ -29,10 +32,16 @@ namespace O_Neillo
             }
         }
 
+        /// <summary>
+        /// The Cellvalue to set squares to when this player plays
+        /// </summary>
         [Description("Integer value used to represent the player"), Category("O'Neillo")]
         public CellValues CellValue { get; set; }
 
-        public Image _playerIcon;
+        private Image _playerIcon;
+        /// <summary>
+        /// Which image to set this players cells to
+        /// </summary>
         [Description("Icon for this player"), Category("O'Neillo")]
         public Image PlayerIcon
         {
@@ -47,6 +56,9 @@ namespace O_Neillo
             }
         }
 
+        /// <summary>
+        /// The name to call the player
+        /// </summary>
         public string PlayerName
         {
             get
@@ -60,6 +72,9 @@ namespace O_Neillo
         }
 
         private bool _playerTurn;
+        /// <summary>
+        /// Whether or not to show the player's turn icon
+        /// </summary>
         [Description("Is it this player's turn?"), Category("O'Neillo")]
         public bool PlayerTurn
         {
@@ -74,6 +89,9 @@ namespace O_Neillo
             }
         }
 
+        /// <summary>
+        /// Initialise the class
+        /// </summary>
         public Playerinfo()
         {
             InitializeComponent();

@@ -14,33 +14,29 @@ namespace O_Neillo
     /// </summary>
     public enum CellValues
     {
+        /// <summary>
+        /// Cell has black tile
+        /// </summary>
         black = 1,
+        /// <summary>
+        /// Cell has white tile
+        /// </summary>
         white = 2,
+        /// <summary>
+        /// Cell has blank tile
+        /// </summary>
         blank = 10
     }
 
+    /// <summary>
+    /// This is the main form, all game logic is included within this.
+    /// </summary>
     public partial class MainGame : Form
     {
-        static int SerialisationVersion = 1;
-
-        #region Public classes
-
         /// <summary>
-        /// Class used to pass savefile data between functions
+        /// The versionm of savegame format to save/load
         /// </summary>
-        public class GameData
-        {
-            public string Player1Name;
-            public string Player2Name;
-            public int Player1Score;
-            public int Player2Score;
-            public int CurrentPlayer;
-            public int GameRows;
-            public int GameColumns;
-            public CellValues[,] GameValsData;
-        }
-
-        #endregion
+        static readonly int SerialisationVersion = 1;
 
         #region Internal classes
 
@@ -61,7 +57,7 @@ namespace O_Neillo
         /// <summary>
         /// Array containing all possible directions that you can flank
         /// </summary>
-        private static Direction[] Directions =
+        private static readonly Direction[] Directions =
         {
             new Direction(-1,-1),
             new Direction(-1,0),
@@ -86,12 +82,11 @@ namespace O_Neillo
             public Stack<Point>[] FlankPoints = new Stack<Point>[Directions.Length];
         }
 
-
         #endregion
 
         #region Internal variables
-        Image GridBlack = Properties.Resources.GridBlack;
-        Image GridWhite = Properties.Resources.GridWhite;
+        readonly Image GridBlack = Properties.Resources.GridBlack;
+        readonly Image GridWhite = Properties.Resources.GridWhite;
 
         /// <summary>
         /// Says whether or not the game's currently being played.
@@ -121,7 +116,7 @@ namespace O_Neillo
         /// <summary>
         /// Speach Synthesize used for TTS
         /// </summary>
-        SpeechSynthesizer synth = new SpeechSynthesizer();
+        readonly SpeechSynthesizer synth = new SpeechSynthesizer();
 
         #endregion
 
@@ -145,7 +140,7 @@ namespace O_Neillo
         /// <summary>
         /// Called whenever you click exit
         /// </summary>
-        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ExitBtn_Click(object sender, EventArgs e)
         {
             if (playing)
             {
@@ -170,7 +165,7 @@ namespace O_Neillo
         /// <summary>
         /// Called whenever you click start game
         /// </summary>
-        private void newGame_Click(object sender, EventArgs e)
+        private void NewGame_Click(object sender, EventArgs e)
         {
             if (playing)
             {
@@ -202,55 +197,24 @@ namespace O_Neillo
         /// <summary>
         /// Called whenever the grid's pressed
         /// </summary>
-        private void gameGrid1_CellPressed(object sender, CellPressedEventArgs e)
+        private void GameGrid1_CellPressed(object sender, CellPressedEventArgs e)
         {
             AttemptMove(e.x, e.y);
         }
 
         /// <summary>
-        /// Called whenever the pass button's pressed.
-        /// </summary>
-        private void passBtn_click(object sender, EventArgs e)
-        {
-            if (!playing)
-            {
-                MustBePlayingError();
-                return;
-            }
-
-            if (AnyLegalMoves())
-            {
-                Speak("A legal move was found, you can't pass.", false, true);
-                return;
-            }
-
-            //MessageBox.Show("No legal moves found, passing turn");
-            Speak("No Legal moves where found, passing your turn!");
-            if (previousPlayerPassed == true)
-            {
-                EndGame();
-            }
-            else
-            {
-                previousPlayerPassed = true;
-                SwitchPlayer();
-            }
-
-            return;
-        }
-
-        /// <summary>
         /// Called whenever the speak checkbox is clicked.
         /// </summary>
-        private void chk_speak_Click(object sender, EventArgs e)
+        private void Check_Speak_Click(object sender, EventArgs e)
         {
             Speak($"Voice Synthesis Turned {(chk_speak.Checked ? "On" : "Off")}");
+            if (!chk_speak.Checked) StopSpeak();
         }
 
         /// <summary>
         /// Called whenever the load button is pressed
         /// </summary>
-        private void loadBtn_Click(object sender, EventArgs e)
+        private void LoadBtn_Click(object sender, EventArgs e)
         {
             switch (openFileDialog1.ShowDialog())
             {
@@ -267,7 +231,7 @@ namespace O_Neillo
         /// <summary>
         /// Called whenever the save button is pressed
         /// </summary>
-        private void saveBtn_Click(object sender, EventArgs e)
+        private void SaveBtn_Click(object sender, EventArgs e)
         {
             if (!playing)
             {
@@ -280,7 +244,7 @@ namespace O_Neillo
         /// <summary>
         /// Called whenever the help button is pressed
         /// </summary>
-        private void helpBtn_Click(object sender, EventArgs e)
+        private void HelpBtn_Click(object sender, EventArgs e)
         {
             new About().Show();
         }
@@ -704,6 +668,8 @@ namespace O_Neillo
         /// Displays text on top right as well as synthesises it
         /// </summary>
         /// <param name="text">Text to display / speak</param>
+        /// <param name="silent">Whether or not to make a bleep if voice synth is off</param>
+        /// <param name="messagebox">Whether or not to display a messagebox</param>
         private void Speak(string text, bool silent = false, bool messagebox = false)
         {
             txt_speech.Text = text;
@@ -923,7 +889,7 @@ namespace O_Neillo
         /// <summary>
         /// Converts an array of lines to gamedata.
         /// </summary>
-        /// <seealso cref="File.ReadAllLines"/>
+        /// <seealso cref="File.ReadAllLines(string)"/>
         /// <param name="data">String array of lines to interpret</param>
         /// <returns>Gamedata ready to be loaded</returns>
         private GameData DeSerializeGame(string[] data)
@@ -1035,4 +1001,44 @@ namespace O_Neillo
         #endregion
 
     }
+
+    /// <summary>
+    /// Class used to pass savefile data between functions
+    /// </summary>
+    public class GameData
+    {
+        /// <summary>
+        /// Name of player 1
+        /// </summary>
+        public string Player1Name;
+        /// <summary>
+        /// Name of player 2
+        /// </summary>
+        public string Player2Name;
+        /// <summary>
+        /// Player 1's Score
+        /// </summary>
+        public int Player1Score;
+        /// <summary>
+        /// Player 2's Score
+        /// </summary>
+        public int Player2Score;
+        /// <summary>
+        /// Current Plater (int value of cellscore)
+        /// </summary>
+        public int CurrentPlayer;
+        /// <summary>
+        /// The number of rows in the game
+        /// </summary>
+        public int GameRows;
+        /// <summary>
+        /// The number of columns in the game
+        /// </summary>
+        public int GameColumns;
+        /// <summary>
+        /// A 2d Representation of the board.
+        /// </summary>
+        public CellValues[,] GameValsData;
+    }
+
 }

@@ -65,7 +65,7 @@ namespace Gamegrid
             this.tbl_centerformat.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tbl_centerformat.Size = new System.Drawing.Size(993, 534);
             this.tbl_centerformat.TabIndex = 1;
-            this.tbl_centerformat.Paint += new System.Windows.Forms.PaintEventHandler(this.tbl_centerformat_Paint);
+            this.tbl_centerformat.Paint += new System.Windows.Forms.PaintEventHandler(this.Table_Center_Paint);
             // 
             // GameGrid
             // 

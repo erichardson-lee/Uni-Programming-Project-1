@@ -113,7 +113,7 @@ namespace O_Neillo
             this.startGameToolStripMenuItem.Name = "startGameToolStripMenuItem";
             this.startGameToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
             this.startGameToolStripMenuItem.Text = "Start Game";
-            this.startGameToolStripMenuItem.Click += new System.EventHandler(this.newGame_Click);
+            this.startGameToolStripMenuItem.Click += new System.EventHandler(this.NewGame_Click);
             // 
             // toolStripSeparator1
             // 
@@ -125,14 +125,14 @@ namespace O_Neillo
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
             this.saveToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
             this.saveToolStripMenuItem.Text = "Save";
-            this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveBtn_Click);
+            this.saveToolStripMenuItem.Click += new System.EventHandler(this.SaveBtn_Click);
             // 
             // loadToolStripMenuItem
             // 
             this.loadToolStripMenuItem.Name = "loadToolStripMenuItem";
             this.loadToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
             this.loadToolStripMenuItem.Text = "Load";
-            this.loadToolStripMenuItem.Click += new System.EventHandler(this.loadBtn_Click);
+            this.loadToolStripMenuItem.Click += new System.EventHandler(this.LoadBtn_Click);
             // 
             // toolStripSeparator2
             // 
@@ -144,7 +144,7 @@ namespace O_Neillo
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
             this.exitToolStripMenuItem.Text = "Exit";
-            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
+            this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitBtn_Click);
             // 
             // settingsToolStripMenuItem
             // 
@@ -160,14 +160,14 @@ namespace O_Neillo
             this.chk_speak.Name = "chk_speak";
             this.chk_speak.Size = new System.Drawing.Size(105, 22);
             this.chk_speak.Text = "Speak";
-            this.chk_speak.Click += new System.EventHandler(this.chk_speak_Click);
+            this.chk_speak.Click += new System.EventHandler(this.Check_Speak_Click);
             // 
             // helpToolStripMenuItem
             // 
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
             this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 23);
             this.helpToolStripMenuItem.Text = "Help";
-            this.helpToolStripMenuItem.Click += new System.EventHandler(this.helpBtn_Click);
+            this.helpToolStripMenuItem.Click += new System.EventHandler(this.HelpBtn_Click);
             // 
             // txt_speech
             // 
@@ -224,7 +224,7 @@ namespace O_Neillo
             this.gameGrid1.Rows = 8;
             this.gameGrid1.Size = new System.Drawing.Size(667, 671);
             this.gameGrid1.TabIndex = 3;
-            this.gameGrid1.CellPressed += new Gamegrid.CellPressedEventHandler(this.gameGrid1_CellPressed);
+            this.gameGrid1.CellPressed += new Gamegrid.CellPressedEventHandler(this.GameGrid1_CellPressed);
             // 
             // MainGame
             // 
