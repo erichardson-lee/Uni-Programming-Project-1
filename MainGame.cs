@@ -301,6 +301,9 @@ namespace O_Neillo
         private void StartGame()
         {
 
+            // Show the grid, since it's meant to be hidden by default
+            gameGrid1.Visible = true;
+
             gameGrid1.InitializeGrid();
             gameVals = new CellValues[gameGrid1.Columns, gameGrid1.Rows];
 
@@ -791,6 +794,9 @@ namespace O_Neillo
         /// <param name="gd">Game Data to load</param>
         private void LoadGame(GameData gd)
         {
+            // Show the grid, since it's meant to be hidden by default
+            gameGrid1.Visible = true;
+
             currentPlayer = (playerinfo1.CellValue == (CellValues)gd.CurrentPlayer) ? playerinfo1 : playerinfo2;
             otherPlayer = (playerinfo1.CellValue != (CellValues)gd.CurrentPlayer) ? playerinfo1 : playerinfo2;
 
